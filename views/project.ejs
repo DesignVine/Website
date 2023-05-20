@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html>
     <head>
         <meta charset="utf-8">
@@ -8,318 +7,231 @@
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="/style.css">
-        <style>
-            * {
-                box-sizing: border-box;
-                font-family: Arial, Helvetica, sans-serif;
-            }
-            .left {
-            width: 20%;
-            }
-    
-            .right {
-            width: 70%;
-            border-left: 1px solid gray;
-            }
-            /* * Post widget * */
+        <link rel="stylesheet" href="/project.css">
+        <link rel="icon" type="image/x-icon" href="/assets/favicon.png">
 
-            input[type="file"] {
-            display: none;
-            }
-            ul {
-            list-style-type: none;
-            }
-
-            .btn {
-            padding: .5em 1em;
-
-            background-color: transparent;
-            color: #6b7270;
-
-            border: none;
-            cursor: pointer;
-            }
-
-            .widget-post {
-            width: 600px;
-            min-height: 100px;
-            height: auto;
-
-            border: 1px solid #eaeaea;
-            border-radius: 6px;
-            box-shadow: 0 1px 2px 1px rgba(130, 130, 130, 0.1);
-
-            background-color: #fff;
-
-            margin: auto;
-            overflow: hidden;
-            }
-
-            .widget-post__header {
-            padding: .2em .5em;
-
-            background-color: #eaeaea;
-            color: #3f5563;
-            }
-            .widget-post__title {
-            font-size: 18px;
-            }
-
-            .widget-post__content {
-            width: 100%;
-            height: 50%;
-            }
-            .widget-post__textarea {
-            width: 100%;
-            height: 100%;
-            padding: .5em;
-
-            border: none;
-            resize: none;
-            }
-            .widget-post__textarea:focus {
-            outline: none;
-            }
-
-            .widget-post__options {
-            padding: .5em;
-            }
-            .widget-post___input {
-            display: inline-block;
-
-            width: 24%;
-            padding: .2em .5em;
-
-            border: 1px solid #eaeaea;
-            border-radius: 1.5em;
-            }
-            .post-actions__label {
-            cursor: pointer;
-            }
-
-            .widget-post__actions {
-            width: 100%;
-            padding: .5em;
-            }
-            .post--actions {
-            position: relative;
-            padding: .5em;
-
-            background-color: #f5f5f5;
-            color: #a2a6a7;
-            }
-            .post-actions__attachments {
-            display: inline-block;
-            width: 60%;
-            }
-            .attachments--btn {
-            background-color: #eaeaea;
-            color: #007582;
-
-            border-radius: 1.5em;
-            }
-
-            .post-actions__widget {
-            display: inline-block;
-            width: 38%;
-            text-align: right;
-            }
-            .post-actions__publish {
-            width: 120px;
-
-            background-color: #008391;
-            color: #fff;
-
-            border-radius: 1.5em;
-            }
-
-            .scroller::-webkit-scrollbar {
-            display: none;
-            }
-
-            .is--hidden {
-            display: none;
-            }
-
-
-            /* * SR * */
-            .sr-only {
-            width: 1px;
-            height: 1px;
-
-            clip: rect(1px, 1px, 1px, 1px);
-            -webkit-clip-path: inset(50%);
-            clip-path: inset(50%);
-
-            overflow: hidden;
-            white-space: nowrap;
-
-            position: absolute;
-            top: 0;
-
-            }
-
-
-            /* *  Placeholder contrast * */
-            ::-webkit-input-placeholder {
-            color: #666;
-            }
-            ::-moz-placeholder {
-            color: #666;
-            }
-            :-ms-input-placeholder {
-            color: #666;
-            }
-            :-moz-placeholder {
-            color: #666;
-            }
-            .container {
-                border: 2px solid #dedede;
-                background-color: #f1f1f1;
-                border-radius:25px;
-                padding: 10px;
-                margin: 10px 0;
-            }
-
-            .darker {
-            border-color: #ccc;
-            background-color: #ddd;
-            }
-
-            .container::after {
-            content: "";
-            clear: both;
-            display: table;
-            }
-
-            .container img {
-            float: left;
-            max-width: 60px;
-            width: 100%;
-            margin-right: 20px;
-            border-radius: 50%;
-            }
-
-            .container img.right {
-            float: right;
-            margin-left: 20px;
-            margin-right:0;
-            }
-
-            .time-right {
-            float: right;
-            color: #aaa;
-            }
-
-            .time-left {
-            float: left;
-            color: #999;
-            }
-            .image_column {
-              float: left;
-              width: 33.33%;
-              padding: 5px;
-              border: 2px solid lightgray;
-            }
-
-            /* Clearfix (clear floats) */
-            .image_row::after {
-              content: "";
-              clear: both;
-              display: table;
-            }
-        </style>
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.0/css/all.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js" integrity="sha512-zYXldzJsDrNKV+odAwFYiDXV2Cy37cwizT+NkuiPGsa9X1dOz04eHvUWVuxaJ299GvcJT31ug2zO4itXBjFx4w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     </head>
 
     <body>
-        <img src="/assets/logo.png" style="width:350px; height:200px;" >
+      <% if (view === 'user') { %>
+        <img src="/assets/logo.png" style="width:350px; height:200px;">
+      <% } %>
+      <br/>
         <div class="row">
             <div class="column left" name = "userInfo">
                 <div style=" text-align: center;">
                     <h2><%= firstname.charAt(0).toUpperCase() + firstname.slice(1) %> <%= lastname.charAt(0).toUpperCase() + lastname.slice(1) %></h2>
                     <h4><%= email %></h4>
-                    <img style=" width: 120px;"src="/assets/socialmedia.png">
+                    <div class="social-media-row">
+                      <a href="https://www.instagram.com/your_username" target="_blank" rel="noopener noreferrer" class="social-media-icon">
+                        <i class="fab fa-instagram"></i>
+                      </a>
+                      <a href="https://www.linkedin.com/in/your_username" target="_blank" rel="noopener noreferrer" class="social-media-icon">
+                        <i class="fab fa-linkedin"></i>
+                      </a>
+                      <a href="https://www.facebook.com/your_username" target="_blank" rel="noopener noreferrer" class="social-media-icon">
+                        <i class="fab fa-facebook-f"></i>
+                      </a>
+                      <br/>
+                    </div>
+                    <% if (view === 'user') { %>
+                      <button style="color:black"class="share-btn" id="share-button">Share with customer</button>
+                      <% } %>
                 </div>
             </div>
-
             <div class="column right" name="Activity">
-
-              <div class="image_row" style="text-align: center;">
-                <% for (let i = 0; i < images.length; i++) { %>
-                  <% let imgUrl = images[i].img.replace(/^.*uploads/, '/uploads'); %>
-                  <div class="image_column">
-                    <img src="<%= imgUrl %>" style="width:100%">
-                    <hr>
-                    <p></p>
-                  </div>
-                <% } %>
-              </div>
+              <% if (view === 'user') { %>
+                <form style="display:block;text-align: right;"id="upload-multimedia-form" action="/project" method="post" enctype="multipart/form-data">
+                  <label  for="upload-multimedia" class="custom-upload-btn">Upload Files</label>
+                  <input name="files" type="file" id="upload-multimedia" accept="image/*, video/*, audio/*" multiple>
+                  <input type="hidden" name="view" value="<%= view %>">
+                  <input type="hidden" name="projectId" value="<%= projectId %>">
+                  <input type="hidden" name="userId" value="<%= userId %>">
+                </form>
                 <br/>
 
+                           
+                  <% } %>
+                  <div class="image_row" style="text-align: center;">
+                    <div class="image_container">
+                      <% for (let i = 0; i < images.length; i++) { %>
+                        <% let imgUrl = images[i].img.replace(/^.*uploads/, '/uploads'); %>
+                        <div class="image_column">
+                          <% let fileExtension = imgUrl.split('.').pop().toLowerCase(); %>
+                          <% if(['mp4', 'mov'].includes(fileExtension)) { %>
+                            <video src="<%= imgUrl %>" class="img-thumbnail" style="width:100%" controls></video>
+                          <% } else { %>
+                            <img src="<%= imgUrl %>" class="img-thumbnail" style="width:100%">
+                          <% } %>
+                          <p contenteditable="true" class="editable-text" data-image-id="<%= images[i].id %>" style="border: 1px solid #000;"></p>
+
+                        </div>
+                      <% } %>
+                    </div>
+                  </div>
+                  
+                <br/>
+                <br/>
                 <br/>
                 <div>
-                    <h2 style="text-align: center;">Activity</h2>
-                    <br/>
-                    <br/>
-                    <div class="widget-post" aria-labelledby="post-header-title">
-                        <div class="widget-post__header">
-                          <h2 class="widget-post__title" id="post-header-title">
-                             <i class="fa fa-pencil" aria-hidden="true"></i>
-                            Write Post
-                          </h2>
-                        </div>
-                        <form id="widget-form" class="widget-post__form" name="form" aria-label="post widget">
-                          <div class="widget-post__content">
-                            <label for="post-content" class="sr-only">Message</label>
-                            <textarea name="post" id="post-content" class="widget-post__textarea scroller" placeholder="Write Comments/Ask Questions"></textarea>
-                          </div>
-                          <div class="widget-post__actions post--actions">
-                            <div class="post-actions__attachments">
-                              <button type="button" class="btn post-actions__upload attachments--btn">
-                                <label for="upload-image" class="post-actions__label">
-                                   <i class="fa fa-upload" aria-hidden="true"></i> 
-                                  Upload Images
-                                </label>
-                              </button>
-                              <input type="file" id="upload-image" accept="image/*" multiple>
-                            </div>
-                            <div class="post-actions__widget">
-                              <button class="btn post-actions__publish">Post</button>
-                            </div>
-                          </div>
-                        </form>
-                      </div>
-                    <br/>
-                    <br/>
+                  <br/>
+                  <br/>
+                  <% if (view !== 'user') { %>
                     <div class="chat" style="width:70%; margin:0 auto;"> 
-                    <div class="container">
-                        <img src="/assets/blankpfp.png" alt="Avatar">
-                        <p>Hello. </p>
-                        <span class="time-right">11:00</span>
-                      </div>
-                      
-                      <div class="container darker">
-                        <img src="/assets/purplepfp.jpg" alt="Avatar" class="right">
-                        <p style="text-align: right;">Hi how are you?</p>
-                        <span class="time-left">11:01</span>
-                      </div>
-                      
-                      <div class="container">
-                        <img src="/assets/blankpfp.png" alt="Avatar">
-                        <p>Good. thank you very much for asking.</p>
-                        <span class="time-right">11:02</span>
-                      </div>
-                      
-                      <div class="container darker">
-                        <img src="/assets/purplepfp.jpg" alt="Avatar" class="right">
-                        <p style="text-align: right;">You're very welcome, have a good day.</p>
-                        <span class="time-left">11:05</span>
-                      </div>
+                      <% messages.forEach(function(message) { %>
+                        <% if (message.message && message.message.trim() !== '') { %> <!-- added condition here -->
+                          <% if (message.sender === 'user') { %>
+                            <div class="message l">
+                              <img src="/assets/purplepfp.jpg" alt="Avatar" >
+                              <p><%= message.message %></p>
+                              <span class="time time-left"><%= formatDate(message.created_at) %></span>
+                            </div>
+                          <% } else { %>
+                            <div class="message r">
+                              <img src="/assets/blankpfp.png" alt="Avatar">
+                              <p><%= message.message %></p>
+                              <span class="time time-right"><%= formatDate(message.created_at) %></span>
+                            </div>
+                          <% } %>
+                        <% } %>
+                      <% }); %>
                     </div>
+                  <% } %>
+                  <% if (view === 'user') { %>
+                    <div class="chat" style="width:70%; margin:0 auto;"> 
+                      <% messages.forEach(function(message) { %>
+                        <% if (message.message && message.message.trim() !== '') { %> <!-- added condition here -->
+                          <% if (message.sender === 'user') { %>
+                            <div class="message r">
+                              <img src="/assets/blankpfp.png" alt="Avatar">
+                              <p><%= message.message %></p>
+                              <span class="time time-right"><%= formatDate(message.created_at) %></span>
+                            </div>
+                          <% } else { %>
+                            <div class="message l">
+                              <img src="/assets/purplepfp.jpg" alt="Avatar" >
+                              <p><%= message.message %></p>
+                              <span class="time time-left"><%= formatDate(message.created_at) %></span>
+                            </div>
+                          <% } %>
+                        <% } %>
+                      <% }); %>
+                    </div>
+                  <% } %>
+                </div>
+                
+                    <form class="message-input-container" enctype="multipart/form-data" action="/project" method="POST" style="width:70%; margin:0 auto;">
+                      <textarea class="message-input" name="textMessage" placeholder="Type your message..."></textarea>
+                      <input type="hidden" name="view" value="<%= view %>">
+                      <input type="hidden" name="projectId" value="<%= projectId %>">
+                      <input type="hidden" name="userId" value="<%= userId %>">
+                      <button class="send-message-button" type="submit">Send Message</button>
+                    </form>
                     <br/>
-                    </div>
+                  </div>
             </div>
         </div>
         <br/>
+        <div id="copied-popup">Link copied to clipboard!</div>
+
+        <% if (view !== 'user') { %>
+          <br/>
+          <span style="color: gray;"><img src="/assets/logo.png" style="width:150px; height:75px;">Powered By DesignVine</span>
+          <% } %>
+          <div id="imageModal" class="modal">
+            <span class="close">&times;</span>
+            <img class="modal-content" id="modalImage">
+          </div>
+          <script>
+            var modal = document.getElementById("imageModal");
+            var modalImage = document.getElementById("modalImage");
+            var thumbnails = document.querySelectorAll(".img-thumbnail");
+            var close = document.getElementsByClassName("close")[0];
+            
+            // Iterate over all thumbnails
+            thumbnails.forEach(function(thumbnail) {
+              thumbnail.onclick = function () {
+                modal.style.display = "block";
+                if (this.tagName === 'IMG') {
+                  modalImage.src = this.src;
+                } else if (this.tagName === 'VIDEO') {
+                  var video = document.createElement('video');
+                  video.src = this.src;
+                  video.controls = true;
+                  video.classList.add('modal-content');
+                  modalImage.replaceWith(video);
+                  modalImage = video;
+                }
+              };
+            });
+            
+            close.onclick = function () {
+              modal.style.display = "none";
+            };
+            
+            window.onclick = function (event) {
+              if (event.target === modal) {
+                modal.style.display = "none";
+              }
+            };
+          </script>
+          
+          <script>
+            document.addEventListener('DOMContentLoaded', function() {
+              var imageContainer = document.querySelector('.image_container');
+              var sortable = Sortable.create(imageContainer, {
+                animation: 150
+              });
+            });
+            document.getElementById('upload-multimedia').addEventListener('change', function() {
+            document.getElementById('upload-multimedia-form').submit();
+            });
+          </script>
+          <script>
+          // copy clipboard link
+          document.getElementById('share-button').addEventListener('click', function() {
+          // Get the current URL
+          var currentUrl = window.location.href;
+
+          // Find the last slash
+          var lastSlashIndex = currentUrl.lastIndexOf('/');
+
+          // Cut the string until the last slash
+          var newUrl = currentUrl.substring(0, lastSlashIndex);
+
+          // Copy to clipboard
+          navigator.clipboard.writeText(newUrl).then(function() {
+              console.log('Copying to clipboard was successful!');
+            }, function(err) {
+                console.error('Could not copy text: ', err);
+            });
+          });
+          </script>
+          <script>
+            // share popup
+            document.getElementById('share-button').addEventListener('click', function() {
+            var url = window.location.href;
+            var lastIndex = url.lastIndexOf("/");
+            var finalUrl = url.substring(0, lastIndex);
+            navigator.clipboard.writeText(finalUrl).then(function() {
+                console.log('URL copied to clipboard');
+                
+                // Show the copied popup
+                var copiedPopup = document.getElementById('copied-popup');
+                copiedPopup.style.display = 'block';
+                
+                // Hide the copied popup after 2 seconds
+                setTimeout(function() {
+                    copiedPopup.style.display = 'none';
+                }, 2000);
+                
+                }).catch(function(err) {
+                    console.error('Could not copy text: ', err);
+                });
+            });
+          </script>
     </body>
 </html>

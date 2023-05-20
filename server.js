@@ -1,3 +1,5 @@
+// Business Address: 8 Main St Suite 9A, Jaffrey, NH 03452
+
 const express = require("express");
 const app = express();
 const fileUpload = require('express-fileupload');
@@ -9,7 +11,32 @@ const passport = require("passport");
 const fs = require('fs');
 
 const initializePassport =require("./passportConfig");
+const nodemailer = require('nodemailer');
 
+const transporter = nodemailer.createTransport({
+  host: 'smtp.zoho.com',
+  port: 465, // Use 465 for SSL
+  secure: true, // true for 465, false for other ports
+  auth: {
+    user: 'designvine@zohomail.com',
+    pass: 'fgh543q$ST',
+  },
+});
+async function sendNotificationEmail(to, subject, text) {
+    try {
+      const mailOptions = {
+        from: 'designvine@zohomail.com',
+        to: to,
+        subject: subject,
+        text: text,
+      };
+  
+      const info = await transporter.sendMail(mailOptions);
+      console.log('Email sent:', info.response);
+    } catch (error) {
+      console.error('Error sending email:', error);
+    }
+  }
 initializePassport(passport);
 
 const PORT = process.env.PORT || 4000;
@@ -44,6 +71,10 @@ app.get('/users/login', checkAuthenticated, (req,res) => {
     res.render("login");
 });
 
+app.get('/users/settings', checkNotAuthenticated, (req,res) => {
+    res.render("settings");
+});
+
 app.get('/users/dashboard', checkNotAuthenticated, async (req,res) => {
     // get list of customers for this user from projects db
     let projects;
@@ -59,7 +90,7 @@ app.get('/users/dashboard', checkNotAuthenticated, async (req,res) => {
             else {
                 console.log("No rows");
             }
-            res.render("dashboard", {user: req.user.firstname, customers: projects});
+            res.render("dashboard", {user: req.user.firstname, customers: projects, user_id: req.user.id});
         }
     )
 });
@@ -67,11 +98,11 @@ app.get('/users/dashboard', checkNotAuthenticated, async (req,res) => {
 
 // fetch project data from database, parse and send to project page so that it can be added to the html elements via ejs
 app.get('/project/:projectId', async function(req, res) {
-    console.log(req.user)
+
     var projectId = req.params.projectId;
-    console.log(projectId);
+    // console.log(projectId);
     pool.query(
-        `SELECT m.message_id, m.message, m.img, m.created_at, u.firstname, u.lastname, u.email
+        `SELECT m.message_id, m.message, m.img, m.created_at, m.sender, u.id as user_id, u.firstname, u.lastname, u.email
         FROM messages m
         JOIN projects p ON m.project_id = p.project_id
         JOIN users u ON p.user_id = u.id
@@ -79,8 +110,6 @@ app.get('/project/:projectId', async function(req, res) {
             if (err) {
                 res.send('<html><head><title>Error</title></head><body><h1>Error: ProjectID not found</h1></body></html>');            
             }
-            console.log(results.rows);
-
             if (results.rows.length < 1) {
                 res.send('<html><head><title>Error</title></head><body><h1>Error: ProjectID not found</h1></body></html>');            
             }
@@ -97,7 +126,44 @@ app.get('/project/:projectId', async function(req, res) {
                     imageMessages.push(message);
                   }
                 });
-                res.render("project", {projectId: projectId, messages:textMessages, images: imageMessages, firstname: username, lastname:userlastname, email:email});
+                let userId = textMessages[0].user_id;
+                console.log(textMessages[0]);
+                res.render("project", {formatDate: formatDate,projectId: projectId, userId: userId, messages:textMessages, images: imageMessages, firstname: username, lastname:userlastname, email:email, view:"client"});
+            }
+        }
+    )
+});
+// fetch project data from database, parse and send to project page so that it can be added to the html elements via ejs
+app.get('/project/:projectId/:userId', async function(req, res) {
+
+    var projectId = req.params.projectId;
+    // console.log(projectId);
+    pool.query(
+        `SELECT m.message_id, m.message, m.img, m.created_at, m.sender, u.id as user_id, u.firstname, u.lastname, u.email
+        FROM messages m
+        JOIN projects p ON m.project_id = p.project_id
+        JOIN users u ON p.user_id = u.id
+        WHERE m.project_id = $1`,[projectId], (err, results)=> {
+            if (err) {
+                res.send('<html><head><title>Error</title></head><body><h1>Error: ProjectID not found</h1></body></html>');            
+            }
+            if (results.rows.length < 1) {
+                res.send('<html><head><title>Error</title></head><body><h1>Error: ProjectID not found</h1></body></html>');            
+            }
+            else {
+                let textMessages = [];
+                let imageMessages = [];
+                let username = results.rows[0].firstname;
+                let userlastname = results.rows[0].lastname;
+                let email = results.rows[0].email;
+                results.rows.forEach((message) => {
+                  if (message.img === null) {
+                    textMessages.push(message);
+                  } else {
+                    imageMessages.push(message);
+                  }
+                });
+                res.render("project", {formatDate: formatDate,projectId: projectId, userId: req.params.userId, messages:textMessages, images: imageMessages, firstname: username, lastname:userlastname, email:email, view:"user"});
             }
         }
     )
@@ -113,6 +179,103 @@ app.get('/users/logout', (req, res)=> {
 
 app.get('/users/project', (req,res) => {
     res.render("project");
+});
+app.post('/project', async function(req, res) {
+    console.log(req.body);
+    console.log(req.files);
+    let sampleFile;
+    let message = req.body.textMessage;
+    let sender = req.body.view; // user (business) or client (customer)
+    let user_id = req.body.userId;
+    let pid = req.body.projectId;
+
+    // Insert message only if it's not empty
+    if (message !== '') {
+        pool.query(
+            `INSERT INTO messages (user_id, project_id, message, sender)
+            VALUES ($1, $2, $3, $4)`, [user_id, pid, message, sender], (err, results)=> {
+                if (err) {
+                    throw err;
+                }
+                req.flash('success_msg', "Message added.");
+            }
+        )
+    }
+
+    // Process the uploaded files
+    if (req.files && Array.isArray(req.files.files)) {
+        req.files.files.forEach(file => {
+            sampleFile = file.file
+            if (!fs.existsSync(__dirname + '/uploads/'+(user_id).toString()+'/')){
+                fs.mkdirSync(__dirname + '/uploads/'+(user_id).toString(), { recursive: true });
+            }
+            uploadPath = __dirname + '/uploads/'+(user_id).toString()+'/' + file.name;
+    
+            file.mv(uploadPath,(err) => {
+                if (err)
+                throw err;
+            });
+            pool.query(
+                `INSERT INTO messages (user_id, project_id, img, sender)
+                VALUES ($1, $2, $3, $4)`, [user_id, pid, uploadPath, sender], (err, results)=> {
+                    if (err) {
+                        throw err;
+                    }
+                    req.flash('success_msg', "Message added.");
+                }
+            )
+        });
+    }
+    else if(req.files) {
+        sampleFile = req.files.files;
+        if (!fs.existsSync(__dirname + '/uploads/'+(user_id).toString()+'/')){
+            fs.mkdirSync(__dirname + '/uploads/'+(user_id).toString(), { recursive: true });
+        }
+        uploadPath = __dirname + '/uploads/'+(user_id).toString()+'/' + sampleFile.name;
+
+        sampleFile.mv(uploadPath, function(err) {
+        if (err)
+            throw err;
+        });
+        pool.query(
+            `INSERT INTO messages (user_id, project_id, img, sender)
+            VALUES ($1, $2, $3, $4)`, [user_id, pid, uploadPath, sender], (err, results)=> {
+                if (err) {
+                    throw err;
+                }
+                req.flash('success_msg', "Message added.");
+            }
+        )
+    }
+
+    // Send the email notification
+    pool.query(
+        `SELECT u_sender.email AS sender_email, u_creator.email AS creator_email
+        FROM projects p
+        JOIN users u_sender ON $1 = u_sender.id
+        JOIN users u_creator ON p.user_id = u_creator.id
+        WHERE p.project_id = $2`, [user_id, pid], (err, results) => {
+            if (err) {
+                throw err;
+            }
+            // Extract the email addresses from the query result
+            const { sender_email, creator_email } = results.rows[0];
+
+            // Determine the recipient's email address
+            const recipientEmail = (sender === 'user') ? creator_email : sender_email;
+
+            // Send the email notification
+            sendNotificationEmail(
+                recipientEmail,
+                'New message received',
+                `A new message has been added to the project. Check it out!`
+            );
+        }
+    );
+
+   
+
+    res.redirect('back')
 });
 
 app.post('/users/dashboard', async (req, res) => {
@@ -133,8 +296,8 @@ app.post('/users/dashboard', async (req, res) => {
                 pid = results.rows[0].project_id
                 if(message) {
                     pool.query(
-                        `INSERT INTO messages (user_id, project_id, message)
-                        VALUES ($1, $2, $3)`, [req.user.id, pid, message], (err, results)=> {
+                        `INSERT INTO messages (user_id, project_id, message, sender)
+                        VALUES ($1, $2, $3, $4)`, [req.user.id, pid, message, "user"], (err, results)=> {
                             if (err) {
                                 throw err;
                             }
@@ -160,8 +323,8 @@ app.post('/users/dashboard', async (req, res) => {
                             throw err;
                         });
                         pool.query(
-                            `INSERT INTO messages (user_id, project_id, img)
-                            VALUES ($1, $2, $3)`, [req.user.id, pid, uploadPath], (err, results)=> {
+                            `INSERT INTO messages (user_id, project_id, img, sender)
+                            VALUES ($1, $2, $3)`, [req.user.id, pid, uploadPath, "user"], (err, results)=> {
                                 if (err) {
                                     throw err;
                                 }
@@ -184,8 +347,8 @@ app.post('/users/dashboard', async (req, res) => {
                         throw err;
                     });
                     pool.query(
-                        `INSERT INTO messages (user_id, project_id, img)
-                        VALUES ($1, $2, $3)`, [req.user.id, pid, uploadPath], (err, results)=> {
+                        `INSERT INTO messages (user_id, project_id, img, sender)
+                        VALUES ($1, $2, $3, $4)`, [req.user.id, pid, uploadPath, "user"], (err, results)=> {
                             if (err) {
                                 throw err;
                             }
@@ -200,6 +363,14 @@ app.post('/users/dashboard', async (req, res) => {
         )
     }
     res.redirect('/users/dashboard');
+})
+app.post('/users/settings', async (req, res) => {
+    console.log(req.body);
+    let { email, tel, instagram, facebook, twitter, desc, files} = req.body;
+    let sampleFile;
+    let uploadPath;
+    let pid;
+    res.render('settings');
 })
 
 app.post('/users/register', async (req, res) => {
@@ -286,3 +457,20 @@ function checkNotAuthenticated(req, res, next) {
 app.listen(PORT, ()=>{
     console.log(`Server Running on PORT ${PORT}`);
 });
+
+//helpers:
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    const day = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()];
+    const month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][date.getMonth()];
+    const dateOfMonth = date.getDate();
+    const year = date.getFullYear();
+    let hours = date.getHours();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    const minutes = ('0' + date.getMinutes()).slice(-2);
+
+    return `${day} ${month} ${dateOfMonth} ${year} ${hours}:${minutes} ${ampm}`;
+  }
