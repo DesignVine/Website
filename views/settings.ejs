@@ -1,34 +1,81 @@
 <!DOCTYPE html>
-
-<html>
+<html lang="en">
     <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>DesignVine: Settings</title>
-        <meta name="description" content="">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css" integrity="sha512-EZLkOqwILORob+p0BXZc+Vm3RgJBOe1Iq/0fiI7r/wJgzOFZMlsqTa29UEl6v6U6gsV4uIpsNZoV32YZqrCRCQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />    
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>DesignVine</title>
+        <!-- Font Awesome icons (free version)-->
+        <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+        <!-- Google fonts-->
+        <link href="https://fonts.googleapis.com/css?family=Varela+Round" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet" />
+        <!-- Core theme CSS (includes Bootstrap)-->
+        <link href="/homepage.css" rel="stylesheet" />
         <link rel="stylesheet" href="/style.css">
+
+        <link rel="icon" type="image/x-icon" href="/assets/favicon.png">
+
     </head>
-    <body>
-        <img src="/assets/logo.png" class="center" style="width:320px; height:200px;" >
+    <style>
+        .form-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .form-container form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 300px; /* You can adjust this value */
+        }
 
-        <br/>
-
-        <h2 style="text-align: center;">User Settings</h2>
-        <ul style="text-align:center;">
+        .form-container form input[type="submit"] {
+            cursor: pointer;
+        }
+    </style>
+    <body id="page-top">
+        <!-- Navigation-->
+        <div >
+        <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+            <div class="container px-4 px-lg-5">
+                <a style="color:black;"class="navbar-brand" href="/">DesignVine</a>
+                <button class="navbar-toggler navbar-toggler-right" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                    Menu
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarResponsive">
+                    <ul  class="navbar-nav ms-auto">
+                        <li class="nav-item"><a style="color:black;" class="nav-link" href="/users/dashboard">Dashboard</a></li>
+                        <li class="nav-item"><a style="color:black;" class="nav-link" href="/users/logout">Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        </div>
+        <section class="projects-section bg-light justify-content-center" id="projects">
+            <ul style="text-align:center;">
             <% if (typeof errors != 'undefined') { %>
                 <% errors.forEach(error =>{%>
                     <li><%= error.message %></li>
                 <% }) %>
             <%} %>
         </ul>
-        <form action="/users/settings" method ="POST">
+        <div class ="form-container">
+        <h3>Settings</h3>
+        <form action="/users/settings" enctype="multipart/form-data" method ="POST">
         <div>
             <input type="text" id ="email" name = "email" placeholder = "Update E-Mail" />
         </div>
         <div>
-            <input type="tel" name="tel" placeholder="Phone # 111-444-5555" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" maxlength="12">
+            <input type="tel" name="tel" placeholder="Phone # 111-222-3333" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" maxlength="12">
+        </div>
+        <div>
+            <input type="text" id ="website" name = "website" placeholder = "Website" />
+        </div>
         <div>
             <input type="text" id ="instagram" name = "instagram" placeholder = "Instagram" />
         </div>
@@ -39,7 +86,10 @@
             <input type="text" id ="twitter" name = "twitter" placeholder = "Twitter" />
         </div>
         <div>
-            <textarea id="desc" name="desc" rows="4" cols="40" maxlength="250" placeholder="Business Description"></textarea>
+            <input type="text" id="businessAddress" name="businessAddress" placeholder="Business Address" />
+        </div>
+        <div>
+            <textarea id="desc" name="desc" placeholder="Business Description"></textarea>
         </div>
         <div class="drop-zone center">
             <span class="drop-zone__prompt">Profile Photo</span>
@@ -51,6 +101,7 @@
         </div>
         <a style="color: red;" href="#"> Deactivate Account</a>
         </form>
+        </div>
         <br/>
         <script>
             document.querySelectorAll(".drop-zone__input").forEach((inputElement) => {
@@ -125,5 +176,15 @@
                 }
             }
         </script>
+        </section>
+        <!-- Bootstrap core JS-->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Core theme JS-->
+        <script src="js/scripts.js"></script>
+        <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *-->
+        <!-- * *                               SB Forms JS                               * *-->
+        <!-- * * Activate your form at https://startbootstrap.com/solution/contact-forms * *-->
+        <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *-->
+        <script src="https://cdn.startbootstrap.com/sb-forms-latest.js"></script>
     </body>
 </html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css" integrity="sha512-EZLkOqwILORob+p0BXZc+Vm3RgJBOe1Iq/0fiI7r/wJgzOFZMlsqTa29UEl6v6U6gsV4uIpsNZoV32YZqrCRCQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />    </head>
+        <link rel="stylesheet" href="/style.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.0/css/all.min.css">
+
+        <link rel="icon" type="image/x-icon" href="/assets/favicon.png">
+    </head>
+    <body>
+        <a href="/">
+            <img src="/assets/logo.png" style="width:350px; height:200px;">
+        </a>     
+        <div class = "dashboard-header">
+            <h1 style="margin-left: 2.5%;">Hi, <%= user.charAt(0).toUpperCase() + user.slice(1) %></h1>
+
+            <a style= "float: right; margin-right:5%;" href="/users/logout">Logout</a>
+            <br/>
+            <a style= "float: right; margin-right:5%;" href="/users/settings">Settings</a>
+            <br/>
+            <hr>
+        </div>
+        <br/>
+
+        <div class="row">
+            <div class="column left" name = "customers">
+                <h3 style="margin-left:15%; text-decoration: underline;" >Customers</h3>
+                <table id="customerTable" style="margin-left:18%; color: #1eaedb" >
+                    <% if (typeof customers != 'undefined') { %>
+                        <% customers.forEach(customer =>{%>
+                                <tr><td>
+                                    <span id ="<%= customer.project_id %>" class="delete-icon"style="color:lightgrey;"><i class="fa fa-trash delete-icon__icon" aria-hidden="true"></i>
+                                    </span>
+                                    <a href="/project/<%= customer.project_id %>/<%= user_id %>">&nbsp;<%= customer.firstname %>&nbsp;<%= customer.lastname %></a></td></tr>
+                            
+                        <% }) %>
+                    <%} %>
+                </table>
+            </div>
+
+            <div class="column right" name="add customer">
+                <div class="addCustomerForm" style="margin-left:15%">
+                <ul style="text-align:center;">
+                    <% if (typeof errors != 'undefined') { %>
+                        <% errors.forEach(error =>{%>
+                            <li><%= error.message %></li>
+                        <% }) %>
+                    <%} %>
+                </ul>
+                <h3 style="text-decoration: underline;">New Project</h3>
+                <form style="text-align: left;" enctype="multipart/form-data" action="/users/dashboard" method ="POST">
+                    <div>
+                        <input type="text" id ="firstname" name = "firstname" placeholder = "Customer First Name" required /> *
+                    </div>
+                    <div>
+                        <input type="text" id ="lastname" name = "lastname" placeholder = "Customer Last Name" required /> *
+                    </div>
+                    <div>
+                        <input type="email" id ="email" name = "email" placeholder = "Customer E-Mail" />
+                    </div>
+                    <div>
+                        <textarea id="description" name="description" rows="4" cols="50" maxlength="250" placeholder="Project Description (Customer will see this)"></textarea>
+                    </div>
+                    <div>
+                        <textarea id="message" name="message" rows="4" cols="50" maxlength="250" placeholder="Initial message to customer (Optional)"></textarea>
+                    </div>
+                    <div class="drop-zone">
+                        <span class="drop-zone__prompt">Drop files here or click to upload</span>
+                        <input type="file" name="files" class="drop-zone__input" multiple>
+                    </div>
+                    <br/>
+                    <div>
+                        <input type="submit" value ="Add Customer"/>
+                    </div>
+                </form>
+                </div>
+            </div>
+        </div>
+        <hr>
+        <br/>
+        <footer>
+        </footer>
+        <script>
+            document.querySelectorAll(".drop-zone__input").forEach((inputElement) => {
+                const dropZoneElement = inputElement.closest(".drop-zone");
+
+                dropZoneElement.addEventListener("click", (e) => {
+                    inputElement.click();
+                });
+
+                inputElement.addEventListener("change", (e) => {
+                    if (inputElement.files.length) {
+                        updateThumbnail(dropZoneElement, inputElement.files[0]);
+                    }
+                });
+
+                dropZoneElement.addEventListener("dragover", (e) => {
+                    e.preventDefault();
+                    dropZoneElement.classList.add("drop-zone--over");
+                });
+
+                ["dragleave", "dragend"].forEach((type) => {
+                    dropZoneElement.addEventListener(type, (e) => {
+                        dropZoneElement.classList.remove("drop-zone--over");
+                    });
+                });
+
+                dropZoneElement.addEventListener("drop", (e) => {
+                    e.preventDefault();
+
+                    if (e.dataTransfer.files.length) {
+                        inputElement.files = e.dataTransfer.files;
+                        updateThumbnail(dropZoneElement, e.dataTransfer.files[0]);
+                    }
+
+                    dropZoneElement.classList.remove("drop-zone--over");
+                });
+            });
+
+            /**
+             * Updates the thumbnail on a drop zone element.
+             *
+             * @param {HTMLElement} dropZoneElement
+             * @param {File} file
+             */
+            function updateThumbnail(dropZoneElement, file) {
+                let thumbnailElement = dropZoneElement.querySelector(".drop-zone__thumb");
+
+                // First time - remove the prompt
+                if (dropZoneElement.querySelector(".drop-zone__prompt")) {
+                    dropZoneElement.querySelector(".drop-zone__prompt").remove();
+                }
+
+                // First time - there is no thumbnail element, so lets create it
+                if (!thumbnailElement) {
+                    thumbnailElement = document.createElement("div");
+                    thumbnailElement.classList.add("drop-zone__thumb");
+                    dropZoneElement.appendChild(thumbnailElement);
+                }
+
+                thumbnailElement.dataset.label = file.name;
+
+                // Show thumbnail for image files
+                if (file.type.startsWith("image/")) {
+                    const reader = new FileReader();
+
+                    reader.readAsDataURL(file);
+                    reader.onload = () => {
+                        thumbnailElement.style.backgroundImage = `url('${reader.result}')`;
+                    };
+                } else {
+                    thumbnailElement.style.backgroundImage = null;
+                }
+            }
+        </script>
+        <script>
+            // Get all delete icons
+            const deleteIcons = document.querySelectorAll('.delete-icon');
+          
+            // Add click event listener to each delete icon
+            deleteIcons.forEach(deleteIcon => {
+              deleteIcon.addEventListener('click', function() {
+                const projectId = deleteIcon.getAttribute('id');
+                
+                // Display confirmation dialog
+                const result = confirm('Are you sure you want to delete this project?');
+                
+                // If user confirms, execute the delete route
+                if (result) {
+                  fetch(`/delete-project/${projectId}`, {
+                    method: 'DELETE'
+                  })
+                  .then(response => {
+                    if (response.ok) {
+                        window.location.reload();
+
+                      // You can add additional code here to update the UI as needed
+                    } else {
+                      alert('Failed to delete the project. Please try again.');
+                    }
+                  })
+                  .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while deleting the project. Please try again.');
+                  });
+                }
+              });
+            });
+          </script>
+    </body>
+
+</html>

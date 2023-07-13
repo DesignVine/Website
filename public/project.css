@@ -20,6 +20,20 @@ ul {
 list-style-type: none;
 }
 
+.img-thumbnail {
+  width: 100%;  
+  height: auto; 
+  object-fit: cover;
+}
+
+@media (min-width: 769px) {
+.img-thumbnail {
+    width: 310px;
+    height: 350px;
+    object-fit: cover;
+}
+}
+
 
 
 .image_column {

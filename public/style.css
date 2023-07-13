@@ -1,39 +1,63 @@
-/* Center an image*/
-.center {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    width: 50%;
-}
-form {
-  text-align: center;
-}
 * {
-  box-sizing: border-box;
-}
-
-/* Create two unequal columns that floats next to each other */
-.column {
-  float: left;
-  padding: 10px;
-}
-
-.left {
-  width: 35%;
-}
-
-.right {
-  width: 60%;
-  border-left: 1px solid gray;
-
-}
-
-/* Clear floats after the columns */
-.row:after {
-  content: "";
-  display: table;
-  clear: both;
-}
+	box-sizing: border-box;
+  }
+  
+  /* Create two unequal columns that floats next to each other */
+  .column {
+	  float: none; /* disable floating on small screens */
+	  width: 100%; /* take full width on small screens */
+	  padding: 10px;
+	  box-sizing: border-box;
+  }
+  
+  .left {
+	  order: 1; /* display first on small screens */
+	  margin-right: 0;
+  }
+  
+  .right {
+	  order: 2; /* display second on small screens */
+	  margin-left: 0;
+  }
+  
+  .row {
+	  display: flex;
+	  flex-direction: column; /* stack columns on top of each other on small screens */
+	  justify-content: center;
+	  width: 100%;
+  }
+  
+  /* apply flex-direction row and re-enable floating for larger screens */
+  @media screen and (min-width: 768px) {
+	  .row {
+		  flex-direction: row;
+	  }
+  
+	  .left {
+		  float: left;
+		  width: 300px;  
+		  margin-right: 100px;
+	  }
+  
+	  .right {
+		  float: right;
+		  width: 500px;
+		  margin-left: 100px;
+	  }
+  }
+  textarea {
+	width: 100%; 
+	display: block;
+	box-sizing: border-box; 
+  }
+  
+  @media screen and (min-width: 768px) {
+	textarea {
+	  width: 500px; 
+	  display: inline-block; /* reset to inline on larger screens if needed */
+	}
+  }
+  
 
 .drop-zone {
 	max-width: 200px;

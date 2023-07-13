@@ -17,27 +17,42 @@
 
     <body>
       <% if (view === 'user') { %>
-        <img src="/assets/logo.png" style="width:350px; height:200px;">
+        <a href="/index.ejs">
+          <img src="/assets/logo.png" style="width:350px; height:200px;">
+      </a>        
+      <button class="share-btn" onclick="location.href='/users/dashboard'" style="position:absolute; left:50px; background-color: white; color: black; border: 1px solid black;">Back</button>
       <% } %>
       <br/>
         <div class="row">
             <div class="column left" name = "userInfo">
                 <div style=" text-align: center;">
-                    <h2><%= firstname.charAt(0).toUpperCase() + firstname.slice(1) %> <%= lastname.charAt(0).toUpperCase() + lastname.slice(1) %></h2>
+                  <% if (view === 'user') { %>
+                  <h2>Customer: <%= project_firstname.charAt(0).toUpperCase() + project_firstname.slice(1) %> <%= project_lastname.charAt(0).toUpperCase() + project_lastname.slice(1) %></h2>
+                  <h4>Customer Email: <%= project_email %></h4>
+                  <br/>
+                  <% } %>
+                  <% if (profile_picture !== '') { %>
+                  <img style="width:100px;height:100px" src="<%= profile_picture %>">
+                  <% } %>
+                  <h2><%= firstname.charAt(0).toUpperCase() + firstname.slice(1) %> <%= lastname.charAt(0).toUpperCase() + lastname.slice(1) %></h2>
                     <h4><%= email %></h4>
+                    <h4><%= business_address %></h4>
+                    <p><%= business_description %></p>
                     <div class="social-media-row">
-                      <a href="https://www.instagram.com/your_username" target="_blank" rel="noopener noreferrer" class="social-media-icon">
+                      <a href="<%= instagram %>" target="_blank" rel="noopener noreferrer" class="social-media-icon">
                         <i class="fab fa-instagram"></i>
                       </a>
-                      <a href="https://www.linkedin.com/in/your_username" target="_blank" rel="noopener noreferrer" class="social-media-icon">
-                        <i class="fab fa-linkedin"></i>
+                      <a href="<%= twitter %>" target="_blank" rel="noopener noreferrer" class="social-media-icon">
+                        <i class="fab fa-twitter"></i>
                       </a>
-                      <a href="https://www.facebook.com/your_username" target="_blank" rel="noopener noreferrer" class="social-media-icon">
+                      <a href="<%= facebook %>" target="_blank" rel="noopener noreferrer" class="social-media-icon">
                         <i class="fab fa-facebook-f"></i>
                       </a>
                       <br/>
                     </div>
                     <% if (view === 'user') { %>
+                      <button style="color:black"class="share-btn" id="savePageButton">Save</button>
+                      <br/>
                       <button style="color:black"class="share-btn" id="share-button">Share with customer</button>
                       <% } %>
                 </div>
@@ -57,21 +72,23 @@
                   <% } %>
                   <div class="image_row" style="text-align: center;">
                     <div class="image_container">
-                      <% for (let i = 0; i < images.length; i++) { %>
-                        <% let imgUrl = images[i].img.replace(/^.*uploads/, '/uploads'); %>
-                        <div class="image_column">
-                          <% let fileExtension = imgUrl.split('.').pop().toLowerCase(); %>
-                          <% if(['mp4', 'mov'].includes(fileExtension)) { %>
-                            <video src="<%= imgUrl %>" class="img-thumbnail" style="width:100%" controls></video>
-                          <% } else { %>
-                            <img src="<%= imgUrl %>" class="img-thumbnail" style="width:100%">
-                          <% } %>
-                          <p contenteditable="true" class="editable-text" data-image-id="<%= images[i].id %>" style="border: 1px solid #000;"></p>
-
-                        </div>
-                      <% } %>
+                        <% for (let i = 0; i < images.length; i++) { %>
+                            <% let imgUrl = images[i].img.replace(/^.*uploads/, '/uploads'); %>
+                            <div class="image_column">
+                                <% let fileExtension = imgUrl.split('.').pop().toLowerCase(); %>
+                                <% if(['mp4', 'mov'].includes(fileExtension)) { %>
+                                    <video src="<%= imgUrl %>" class="img-thumbnail" style="width:100%" controls></video>
+                                <% } else { %>
+                                    <img src="<%= imgUrl %>" class="img-thumbnail" style="width:100%">
+                                <% } %>
+                                <p contenteditable="true" class="editable-text" data-image-id="<%= images[i].message_id %>" style=" color:black;">
+                                  <%= images[i].caption ? images[i].caption : '' %>
+                                </p>
+                            </div>
+                        <% } %>
                     </div>
-                  </div>
+                </div>
+                
                   
                 <br/>
                 <br/>
@@ -233,5 +250,34 @@
                 });
             });
           </script>
+      <script>
+        document.querySelector('#savePageButton').addEventListener('click', function() {
+        let orderedImages = Array.from(document.querySelectorAll('.image_column')).map((imageColumn, index) => {
+            let imgId = imageColumn.querySelector('.editable-text').getAttribute('data-image-id');
+            let imgCaption = imageColumn.querySelector('.editable-text').textContent.trim();
+            return { id: imgId, caption: imgCaption };
+        });
+
+        fetch('/save-page', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ orderedImages: orderedImages }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+              window.location.reload();
+            } else {
+                alert('There was an error saving the page. Please try again.');
+            }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+    });
+
+      </script>          
     </body>
 </html>

@@ -1,49 +1,122 @@
 <!DOCTYPE html>
-
-<html>
+<html lang="en">
     <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>DesignVine: Register</title>
-        <meta name="description" content="">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css" integrity="sha512-EZLkOqwILORob+p0BXZc+Vm3RgJBOe1Iq/0fiI7r/wJgzOFZMlsqTa29UEl6v6U6gsV4uIpsNZoV32YZqrCRCQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />    
-        <link rel="stylesheet" href="/style.css">
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>DesignVine</title>
+        <!-- Font Awesome icons (free version)-->
+        <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+        <!-- Google fonts-->
+        <link href="https://fonts.googleapis.com/css?family=Varela+Round" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet" />
+        <!-- Core theme CSS (includes Bootstrap)-->
+        <link href="/homepage.css" rel="stylesheet" />
+        <link rel="icon" type="image/x-icon" href="/assets/favicon.png">
     </head>
-    <body>
-        <img src="/assets/logo.png" class="center" style="width:320px; height:200px;" >
+    <style>
+        .form-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .form-container form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 300px; /* You can adjust this value */
+        }
+        .form-container form div {
+            width: 100%;
+        }
+        .form-container form input[type="submit"] {
+            cursor: pointer;
+        }
+    </style>
+    <body class="bg-light"id="page-top">
+        <!-- Navigation-->
+        <div >
+        <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+            <div style=""class="container px-4 px-lg-5">
+                <a style="color:black;"class="navbar-brand" href="/">DesignVine</a>
+                <button class="navbar-toggler navbar-toggler-right" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                    Menu
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarResponsive">
+                    <ul  class="navbar-nav ms-auto">
+                        <li class="nav-item"><a style="color:black;" class="nav-link" href="/about">How It Works</a></li>
+                        <li class="nav-item"><a style="color:black;" class="nav-link" href="/about">Our Story</a></li>
+                        <li class="nav-item"><a style="color:black;" class="nav-link" href="/users/register">Sign Up</a></li>
+                        <li class="nav-item"><a style="color:black;" class="nav-link" href="/users/login">Log In</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        </div>
+        <!-- Projects-->
+        <section class="projects-section bg-light justify-content-center" id="projects">
+            <br/>
+            <h2 style="text-align: center;">Sign Up</h2>
+            <ul style="text-align:center;">
+                <% if (typeof errors != 'undefined') { %>
+                    <% errors.forEach(error =>{%>
+                        <li><%= error.message %></li>
+                    <% }) %>
+                <%} %>
+            </ul>
+            <div class ="form-container">
+            <form style="text-align: center;" enctype="multipart/form-data" action="/users/register" method ="POST">
+            <div>
+                <input type="text" id ="firstname" name = "firstname" placeholder = "First Name" required />
+            </div>
+            <br/>
+            <div>
+                <input type="text" id ="lastname" name = "lastname" placeholder = "Last Name" required />
+            </div>
+            <br/>
+            <div>
+                <input type="text" id ="email" name = "email" placeholder = "E-Mail" required />
+            </div>
+            <br/>
+            <div>
+                <input type="password" id ="password" name = "password" placeholder = "Password" required />
+            </div>
+            <br/>
+            <div>
+                <input type="password" id ="password2" name = "password2" placeholder = "Confirm Password" required />
+            </div>
+            <br/>
+            <div>
+                <input type="submit" value ="Sign Up"/>
+            </div>
+            <br/>
+            <a href="/users/login"> Already registered? Login here</a>
+            </form>
+            </div>
+        </section>
 
         <br/>
-
-        <h2 style="text-align: center;">Sign Up</h2>
-        <ul style="text-align:center;">
-            <% if (typeof errors != 'undefined') { %>
-                <% errors.forEach(error =>{%>
-                    <li><%= error.message %></li>
-                <% }) %>
-            <%} %>
-        </ul>
-        <form style="text-align: center;" enctype="multipart/form-data" action="/users/dashboard" method ="POST">
-        <div>
-            <input type="text" id ="firstname" name = "firstname" placeholder = "First Name" required />
+        <br/>
+        <br/> 
+        <br/> 
+        <br/> 
+        <br/> 
+        <div class="social d-flex justify-content-center">
+            <a class="mx-2" href="https://instagram.com/designvine.co"><i class="fab fa-instagram"></i></a>
+            <a class="mx-2" href="#!"><i class="fab fa-youtube"></i></a>
         </div>
-        <div>
-            <input type="text" id ="lastname" name = "lastname" placeholder = "Last Name" required />
-        </div>
-        <div>
-            <input type="text" id ="email" name = "email" placeholder = "E-Mail" required />
-        </div>
-        <div>
-            <input type="password" id ="password" name = "password" placeholder = "Password" required />
-        </div>
-        <div>
-            <input type="password" id ="password2" name = "password2" placeholder = "Confirm Password" required />
-        </div>
-        <div>
-            <input type="submit" value ="Sign Up"/>
-        </div>
-        <a href="/users/login"> Already registered? Login here</a>
-        </form>
-        
+        <!-- Bootstrap core JS-->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Core theme JS-->
+        <script src="js/scripts.js"></script>
+        <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *-->
+        <!-- * *                               SB Forms JS                               * *-->
+        <!-- * * Activate your form at https://startbootstrap.com/solution/contact-forms * *-->
+        <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *-->
+        <script src="https://cdn.startbootstrap.com/sb-forms-latest.js"></script>
     </body>
 </html>

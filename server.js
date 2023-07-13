@@ -9,6 +9,8 @@ const { pool } = require("./dbConfig");
 const bcrypt = require('bcrypt');
 const passport = require("passport");
 const fs = require('fs');
+const path = require('path');
+const util = require('util');
 
 const initializePassport =require("./passportConfig");
 const nodemailer = require('nodemailer');
@@ -22,6 +24,8 @@ const transporter = nodemailer.createTransport({
     pass: 'fgh543q$ST',
   },
 });
+//Company Name - Subject Link - Message
+// Customer Name, Message, Timestamp
 async function sendNotificationEmail(to, subject, text) {
     try {
       const mailOptions = {
@@ -47,6 +51,10 @@ app.set("view engine", "ejs");
 app.use(express.urlencoded({extended: false}));
 app.use(express.static(__dirname + "/public"));
 app.use('/uploads', express.static(__dirname + '/uploads'));
+app.use('/pfp', express.static(__dirname + '/pfp'));
+
+
+app.use(express.json());
 
 // saves session details 
 app.use(session({
@@ -62,7 +70,9 @@ app.use(flash());
 app.get('/', (req,res) => {
     res.render("index");
 });
-
+app.get('/about', (req,res) => {
+    res.render("about");
+});
 app.get('/users/register', checkAuthenticated, (req,res) => {
     res.render("register");
 });
@@ -94,23 +104,42 @@ app.get('/users/dashboard', checkNotAuthenticated, async (req,res) => {
         }
     )
 });
-
-
-// fetch project data from database, parse and send to project page so that it can be added to the html elements via ejs
-app.get('/project/:projectId', async function(req, res) {
-
-    var projectId = req.params.projectId;
-    // console.log(projectId);
+app.get('/users/dashboardtest', checkNotAuthenticated, async (req,res) => {
+    // get list of customers for this user from projects db
+    let projects;
     pool.query(
-        `SELECT m.message_id, m.message, m.img, m.created_at, m.sender, u.id as user_id, u.firstname, u.lastname, u.email
+        `SELECT * FROM projects WHERE user_id = $1`,[req.user.id], (err, results)=> {
+            if (err) {
+                throw err;
+            }
+            if (results.rows.length > 0) {
+                projects = results.rows;
+                console.log(projects);
+            }
+            else {
+                console.log("No rows");
+            }
+            res.render("dashboardtest", {user: req.user.firstname, customers: projects, user_id: req.user.id});
+        }
+    )
+});
+
+app.get('/project/:projectId', async function(req, res) {
+    var projectId = req.params.projectId;
+
+    pool.query(
+        `SELECT m.message_id, m.message, m.img, m.caption, m.img_order, m.created_at, m.sender, 
+                u.id as user_id, u.firstname, u.lastname, u.email, u.phone, u.instagram, u.facebook, 
+                u.twitter, u.business_desc, u.profile_photo, u.business_address
         FROM messages m
         JOIN projects p ON m.project_id = p.project_id
         JOIN users u ON p.user_id = u.id
-        WHERE m.project_id = $1`,[projectId], (err, results)=> {
+        WHERE m.project_id = $1
+        ORDER BY m.img_order ASC`, [projectId], (err, results) => {
             if (err) {
                 res.send('<html><head><title>Error</title></head><body><h1>Error: ProjectID not found</h1></body></html>');            
             }
-            if (results.rows.length < 1) {
+            else if (!results || !results.rows || results.rows.length < 1) {
                 res.send('<html><head><title>Error</title></head><body><h1>Error: ProjectID not found</h1></body></html>');            
             }
             else {
@@ -119,6 +148,20 @@ app.get('/project/:projectId', async function(req, res) {
                 let username = results.rows[0].firstname;
                 let userlastname = results.rows[0].lastname;
                 let email = results.rows[0].email;
+                let phone = results.rows[0].phone;
+                let instagram = results.rows[0].instagram;
+                let facebook = results.rows[0].facebook;
+                let twitter = results.rows[0].twitter;
+                let business_description = results.rows[0].business_desc;
+                let profile_picture;
+
+                try {
+                    profile_picture = results.rows[0].profile_photo.replace(/^.*[\\\/]pfp[\\\/]/, '/pfp/');
+                } catch (err) {
+                    profile_picture = '';  // Or set it to a default image
+                }
+                let business_address = results.rows[0].business_address;
+
                 results.rows.forEach((message) => {
                   if (message.img === null) {
                     textMessages.push(message);
@@ -126,36 +169,78 @@ app.get('/project/:projectId', async function(req, res) {
                     imageMessages.push(message);
                   }
                 });
+
                 let userId = textMessages[0].user_id;
-                console.log(textMessages[0]);
-                res.render("project", {formatDate: formatDate,projectId: projectId, userId: userId, messages:textMessages, images: imageMessages, firstname: username, lastname:userlastname, email:email, view:"client"});
+                textMessages.sort((a, b) => new Date(b.created_at) + new Date(a.created_at));
+
+                res.render("project", {
+                    formatDate: formatDate,
+                    projectId: projectId, 
+                    userId: userId, 
+                    messages: textMessages, 
+                    images: imageMessages, 
+                    firstname: username, 
+                    lastname: userlastname, 
+                    email: email,
+                    phone: phone, 
+                    instagram: instagram, 
+                    facebook: facebook, 
+                    twitter: twitter, 
+                    business_description: business_description,
+                    profile_picture: profile_picture,
+                    business_address: business_address,
+                    view: "client"
+                });
             }
         }
     )
 });
-// fetch project data from database, parse and send to project page so that it can be added to the html elements via ejs
+
+
 app.get('/project/:projectId/:userId', async function(req, res) {
 
     var projectId = req.params.projectId;
-    // console.log(projectId);
+
     pool.query(
-        `SELECT m.message_id, m.message, m.img, m.created_at, m.sender, u.id as user_id, u.firstname, u.lastname, u.email
+        `SELECT m.message_id, m.message, m.img, m.caption, m.img_order, m.created_at, m.sender, 
+                u.id as user_id, u.firstname as user_firstname, u.lastname as user_lastname, u.email as user_email, 
+                u.phone, u.instagram, u.facebook, u.twitter, u.business_desc, u.profile_photo, u.business_address,
+                p.firstname as project_firstname, p.lastname as project_lastname, p.email as project_email
         FROM messages m
         JOIN projects p ON m.project_id = p.project_id
         JOIN users u ON p.user_id = u.id
-        WHERE m.project_id = $1`,[projectId], (err, results)=> {
+        WHERE m.project_id = $1
+        ORDER BY m.img_order ASC`, [projectId], (err, results) => {
             if (err) {
                 res.send('<html><head><title>Error</title></head><body><h1>Error: ProjectID not found</h1></body></html>');            
             }
-            if (results.rows.length < 1) {
+            else if (!results || !results.rows || results.rows.length < 1) {
                 res.send('<html><head><title>Error</title></head><body><h1>Error: ProjectID not found</h1></body></html>');            
             }
             else {
                 let textMessages = [];
                 let imageMessages = [];
-                let username = results.rows[0].firstname;
-                let userlastname = results.rows[0].lastname;
-                let email = results.rows[0].email;
+                let user_firstname = results.rows[0].user_firstname;
+                let user_lastname = results.rows[0].user_lastname;
+                let user_email = results.rows[0].user_email;
+                let project_firstname = results.rows[0].project_firstname;
+                let project_lastname = results.rows[0].project_lastname;
+                let project_email = results.rows[0].project_email;
+                let phone = results.rows[0].phone;
+                let instagram = results.rows[0].instagram;
+                let facebook = results.rows[0].facebook;
+                let twitter = results.rows[0].twitter;
+                let business_description = results.rows[0].business_desc;
+                let profile_picture;
+
+                try {
+                    profile_picture = results.rows[0].profile_photo.replace(/^.*[\\\/]pfp[\\\/]/, '/pfp/');
+                } catch (err) {
+                    profile_picture = '';  // Or set it to a default image
+                }
+                
+                let business_address = results.rows[0].business_address;
+
                 results.rows.forEach((message) => {
                   if (message.img === null) {
                     textMessages.push(message);
@@ -163,11 +248,35 @@ app.get('/project/:projectId/:userId', async function(req, res) {
                     imageMessages.push(message);
                   }
                 });
-                res.render("project", {formatDate: formatDate,projectId: projectId, userId: req.params.userId, messages:textMessages, images: imageMessages, firstname: username, lastname:userlastname, email:email, view:"user"});
+                textMessages.sort((a, b) => new Date(b.created_at) + new Date(a.created_at));
+
+                res.render("project", {
+                    formatDate: formatDate,
+                    projectId: projectId, 
+                    userId: req.params.userId, 
+                    messages: textMessages, 
+                    images: imageMessages, 
+                    firstname: user_firstname, 
+                    lastname: user_lastname, 
+                    email: user_email,
+                    project_firstname: project_firstname, 
+                    project_lastname: project_lastname, 
+                    project_email: project_email,
+                    phone: phone, 
+                    instagram: instagram, 
+                    facebook: facebook, 
+                    twitter: twitter, 
+                    business_description: business_description,
+                    profile_picture: profile_picture,
+                    business_address: business_address,
+                    view: "user"
+                });
             }
         }
     )
 });
+
+
 
 app.get('/users/logout', (req, res)=> {
     req.logout(function(err) {
@@ -181,16 +290,18 @@ app.get('/users/project', (req,res) => {
     res.render("project");
 });
 app.post('/project', async function(req, res) {
-    console.log(req.body);
-    console.log(req.files);
+
     let sampleFile;
     let message = req.body.textMessage;
     let sender = req.body.view; // user (business) or client (customer)
     let user_id = req.body.userId;
     let pid = req.body.projectId;
+    let textMessageAdded = false;
+    let imageMessageAdded = false;
 
     // Insert message only if it's not empty
     if (message !== '') {
+        textMessageAdded = true;
         pool.query(
             `INSERT INTO messages (user_id, project_id, message, sender)
             VALUES ($1, $2, $3, $4)`, [user_id, pid, message, sender], (err, results)=> {
@@ -204,6 +315,7 @@ app.post('/project', async function(req, res) {
 
     // Process the uploaded files
     if (req.files && Array.isArray(req.files.files)) {
+        imageMessageAdded = true;
         req.files.files.forEach(file => {
             sampleFile = file.file
             if (!fs.existsSync(__dirname + '/uploads/'+(user_id).toString()+'/')){
@@ -227,6 +339,7 @@ app.post('/project', async function(req, res) {
         });
     }
     else if(req.files) {
+        imageMessageAdded = true;
         sampleFile = req.files.files;
         if (!fs.existsSync(__dirname + '/uploads/'+(user_id).toString()+'/')){
             fs.mkdirSync(__dirname + '/uploads/'+(user_id).toString(), { recursive: true });
@@ -250,33 +363,44 @@ app.post('/project', async function(req, res) {
 
     // Send the email notification
     pool.query(
-        `SELECT u_sender.email AS sender_email, u_creator.email AS creator_email
-        FROM projects p
-        JOIN users u_sender ON $1 = u_sender.id
-        JOIN users u_creator ON p.user_id = u_creator.id
-        WHERE p.project_id = $2`, [user_id, pid], (err, results) => {
+        `SELECT u.email AS user_email, p.email AS project_email
+        FROM users u
+        JOIN projects p ON u.id = p.user_id
+        WHERE u.id = $1 AND p.project_id = $2`, [user_id, pid], (err, results) => {
             if (err) {
                 throw err;
             }
-            // Extract the email addresses from the query result
-            const { sender_email, creator_email } = results.rows[0];
-
-            // Determine the recipient's email address
-            const recipientEmail = (sender === 'user') ? creator_email : sender_email;
-
+    
+            const { user_email, project_email } = results.rows[0];
+            const recipientEmail = (sender === 'user') ? project_email : user_email;
+            const emailSender = (sender === 'user') ? user_email : project_email;
+    
+            // Determine the email content
+            let emailContent;
+            let subject;
+            if (textMessageAdded && !imageMessageAdded) {
+                emailContent = `New message sent by ${emailSender}: ${message}`;
+                subject = 'New message received';
+            } else if (!textMessageAdded && imageMessageAdded) {
+                subject = 'New images added to your project'
+                emailContent = `New images added by: ${emailSender}`;
+            } else {
+                subject = "A new message and images have been added to your project";
+                emailContent = `A new message and images have been added to the project by: ${emailSender}. Check it out!`;
+            }
+    
             // Send the email notification
             sendNotificationEmail(
                 recipientEmail,
-                'New message received',
-                `A new message has been added to the project. Check it out!`
+                subject,
+                emailContent
             );
         }
     );
-
-   
-
+    
     res.redirect('back')
 });
+
 
 app.post('/users/dashboard', async (req, res) => {
     let { firstname, lastname, email, description, message} = req.body;
@@ -324,7 +448,7 @@ app.post('/users/dashboard', async (req, res) => {
                         });
                         pool.query(
                             `INSERT INTO messages (user_id, project_id, img, sender)
-                            VALUES ($1, $2, $3)`, [req.user.id, pid, uploadPath, "user"], (err, results)=> {
+                            VALUES ($1, $2, $3, $4)`, [req.user.id, pid, uploadPath, "user"], (err, results)=> {
                                 if (err) {
                                     throw err;
                                 }
@@ -357,31 +481,46 @@ app.post('/users/dashboard', async (req, res) => {
                     )
                 }
                 
-                console.log(results.rows);
                 req.flash('success_msg', "Project Added.");
             }
         )
     }
     res.redirect('/users/dashboard');
 })
-app.post('/users/settings', async (req, res) => {
-    console.log(req.body);
-    let { email, tel, instagram, facebook, twitter, desc, files} = req.body;
-    let sampleFile;
-    let uploadPath;
-    let pid;
-    res.render('settings');
-})
+
+app.post('/save-page', async (req, res) => {
+    const { orderedImages } = req.body;
+    try {
+        await pool.connect();
+
+        // Start transaction
+        await pool.query('BEGIN');
+
+        for (let i = 0; i < orderedImages.length; i++) {
+            await pool.query(
+                `UPDATE messages 
+                SET img_order = $1, caption = $2
+                WHERE message_id = $3`, 
+                [i + 1, orderedImages[i].caption, orderedImages[i].id]
+            );
+        }
+
+        // Commit transaction
+        await pool.query('COMMIT');
+        
+        res.json({ status: 'success' });
+    } catch (err) {
+        // Rollback transaction in case of any error
+        await pool.query('ROLLBACK');
+        console.error(err);
+        res.status(500).json({ status: 'error', message: err.toString() });
+    }
+});
+
+
 
 app.post('/users/register', async (req, res) => {
     let { firstname, lastname, email, password, password2} = req.body;
-    console.log({
-        firstname,
-        lastname,
-        email,
-        password,
-        password2
-    });
 
     let errors = [];
     if (!firstname || !lastname || !email || !password || !password2) {
@@ -402,7 +541,6 @@ app.post('/users/register', async (req, res) => {
     else {
         // form validation has passed
         let hashedPassword = await bcrypt.hash(password, 10);
-        console.log(hashedPassword);
 
         pool.query(
             `SELECT * FROM users WHERE email = $1`,[email], (err, results)=> {
@@ -440,6 +578,102 @@ app.post('/users/login', passport.authenticate('local', {
     failureFlash: true
 }));
 
+app.post('/users/settings', async (req, res) => {
+    const { email, tel, instagram, facebook, twitter, desc, businessAddress, files } = req.body;
+    let user_id = req.user.id;
+
+    // Object to store the fields to update
+    const fieldsToUpdate = {};
+
+    // Only add fields that have a value
+    if (tel) fieldsToUpdate.phone = tel;
+    if (instagram) fieldsToUpdate.instagram = instagram;
+    if (facebook) fieldsToUpdate.facebook = facebook;
+    if (twitter) fieldsToUpdate.twitter = twitter;
+    if (desc) fieldsToUpdate.business_desc = desc;
+    if (businessAddress) fieldsToUpdate.business_address = businessAddress;
+
+    try {
+        // Get a client from the connection pool
+        const client = await pool.connect();
+
+        // Start transaction
+        await client.query('BEGIN');
+
+        // Handle file upload
+        if (req.files) {
+            const sampleFile = req.files.files;
+            const uploadDir = path.join(__dirname, '/pfp', user_id.toString());
+            if (!fs.existsSync(uploadDir)) {
+                fs.mkdirSync(uploadDir, { recursive: true });
+            }
+            const uploadPath = path.join(uploadDir, sampleFile.name);
+
+            // Move the file
+            await util.promisify(sampleFile.mv)(uploadPath);
+
+            // Add the profile_photo to the update fields
+            fieldsToUpdate.profile_photo = uploadPath;
+        }
+
+        // Construct the SQL UPDATE query
+        const setString = Object.keys(fieldsToUpdate)
+            .map((key, i) => `${key} = $${i + 1}`)
+            .join(', ');
+
+        const values = Object.values(fieldsToUpdate);
+        // Append the user id to the values array
+        values.push(user_id);
+
+        await client.query(
+            `UPDATE users SET ${setString} WHERE id = $${values.length}`,
+            values
+        );
+
+        // Commit transaction
+        await client.query('COMMIT');
+
+        // Release the client back to the pool
+        client.release();
+
+        // Redirect to dashboard
+        res.redirect('/users/dashboard');
+    } catch (err) {
+        // Rollback transaction in case of any error
+        await pool.query('ROLLBACK');
+        console.error(err);
+        res.status(500).json({ status: 'error', message: err.toString() });
+    }
+});
+
+
+
+
+app.delete('/delete-project/:projectId', async (req, res) => {
+    const projectId = req.params.projectId;
+
+    try {
+      // Start transaction
+      await pool.query('BEGIN');
+        // Delete associated messages from the messages table
+        await pool.query('DELETE FROM messages WHERE project_id = $1', [projectId]);
+      // Delete the project from the projects table
+      await pool.query('DELETE FROM projects WHERE project_id = $1', [projectId]);
+  
+
+  
+      // Commit transaction
+      await pool.query('COMMIT');
+  
+      res.sendStatus(200); // Send a success status code
+    } catch (err) {
+      // Rollback transaction in case of any error
+      await pool.query('ROLLBACK');
+      console.error(err);
+      res.status(500).send('Failed to delete the project.'); // Send an error status code and message
+    }
+  });
+  
 function checkAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
         return res.redirect('/users/dashboard');
