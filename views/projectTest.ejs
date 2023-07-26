@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>DesignVine</title>
+        <!-- Font Awesome icons (free version)-->
+        <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+        <!-- Google fonts-->
+        <link href="https://fonts.googleapis.com/css?family=Varela+Round" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet" />
+        <!-- Core theme CSS (includes Bootstrap)-->
+        <link href="/homepage.css" rel="stylesheet" />
+        <link rel="stylesheet" href="/style.css">
+        <link rel="stylesheet" href="/project.css">
+        <link rel="icon" type="image/x-icon" href="/assets/favicon.png">
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.0/css/all.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js" integrity="sha512-zYXldzJsDrNKV+odAwFYiDXV2Cy37cwizT+NkuiPGsa9X1dOz04eHvUWVuxaJ299GvcJT31ug2zO4itXBjFx4w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    </head>
+
+    <body class="bg-light"id="page-top">
+        <!-- Navigation-->
+        <div >
+            <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+                <div class="container px-4 px-lg-5">
+                    <a style="color:black;"class="navbar-brand" href="/">DesignVine</a>
+                    <button class="navbar-toggler navbar-toggler-right" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                        Menu
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarResponsive">
+                        <ul  class="navbar-nav ms-auto">
+                            <li class="nav-item"><a style="color:black;" class="nav-link" href="/users/dashboard">Dashboard</a></li>
+                            <li class="nav-item"><a style="color:black;" class="nav-link" href="/users/logout">Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+            </div>
+          <br/>
+    <!-- Use Bootstrap's grid system for the row and columns -->
+<div class="container mt-4">
+    <br/>
+    <br/>
+    <div class="row">
+        <div class="col-md-12" style="margin-right: 20px;">
+            <!-- Content for the left column -->
+            <!-- You can add other Bootstrap classes to style this column if needed -->
+            <div style="text-align: center;">
+                <% if (view === 'user') { %>
+                    <h4>Customer: <%= project_firstname.charAt(0).toUpperCase() + project_firstname.slice(1) %> <%= project_lastname.charAt(0).toUpperCase() + project_lastname.slice(1) %></h4>
+                    <h6>Customer Email: <%= project_email %></h6>
+                    <br/>
+                <% } %>
+                <% if (profile_picture !== '') { %>
+                    <img style="width:100px;height:100px" src="<%= profile_picture %>">
+                <% } %>
+                <% if (view !== 'user') { %>
+                <h4><%= firstname.charAt(0).toUpperCase() + firstname.slice(1) %> <%= lastname.charAt(0).toUpperCase() + lastname.slice(1) %></h4>
+                <h6><%= email %></h6>
+                <h6><%= business_address %></h6>
+                <p><%= business_description %></p>
+                <div class="social-media-row">
+                    <a href="<%= instagram %>" target="_blank" rel="noopener noreferrer" class="social-media-icon">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="<%= twitter %>" target="_blank" rel="noopener noreferrer" class="social-media-icon">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="<%= facebook %>" target="_blank" rel="noopener noreferrer" class="social-media-icon">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <br/>
+                </div>
+                <% } %>
+                <br/>
+                <% if (view === 'user') { %>
+                    <button style="color:black" class="btn btn-primary share-btn" id="savePageButton">Save</button>
+                    <br/>
+                    <button style="color:black" class="btn btn-primary share-btn" id="share-button">Share with customer</button>
+                <% } %>
+            </div>
+            <br/>
+        </div>
+        <div class="col-md-12">
+            <!-- Content for the right column -->
+            <!-- You can add other Bootstrap classes to style this column if needed -->
+            <% if (view === 'user') { %>
+                <form style="display:block;text-align: right;" id="upload-multimedia-form" action="/project" method="post" enctype="multipart/form-data">
+                    <label for="upload-multimedia" class="btn btn-primary custom-upload-btn">Upload Files</label>
+                    <input name="files" type="file" id="upload-multimedia" accept="image/*, video/*, audio/*" multiple>
+                    <input type="hidden" name="view" value="<%= view %>">
+                    <input type="hidden" name="projectId" value="<%= projectId %>">
+                    <input type="hidden" name="userId" value="<%= userId %>">
+                </form>
+                <br/>
+            <% } %>
+
+            <div class="image_row" style="text-align: center;">
+                <div class="image_container">
+                    <% for (let i = 0; i < images.length; i++) { %>
+                        <% let imgUrl = images[i].img.replace(/^.*uploads/, '/uploads'); %>
+                        <div class="image_column">
+                            <% let fileExtension = imgUrl.split('.').pop().toLowerCase(); %>
+                            <% if(['mp4', 'mov'].includes(fileExtension)) { %>
+                                <video src="<%= imgUrl %>" class="img-thumbnail" style="width:100%" controls></video>
+                            <% } else { %>
+                                <img src="<%= imgUrl %>" class="img-thumbnail" style="width:100%">
+                            <% } %>
+                            <p contenteditable="true" class="editable-text" data-image-id="<%= images[i].message_id %>" style=" color:grey;">
+                                <%= images[i].caption ? images[i].caption : '' %>
+                            </p>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+            <br/>
+            <br/>
+            <br/>
+            <div>
+                <br/>
+                <br/>
+                <% if (view !== 'user') { %>
+                    <div class="chat" style="width:100%; margin:0 auto;"> 
+                        <% messages.forEach(function(message) { %>
+                            <% if (message.message && message.message.trim() !== '') { %> <!-- added condition here -->
+                                <% if (message.sender === 'user') { %>
+                                    <div class="message l">
+                                        <img src="/assets/purplepfp.jpg" alt="Avatar" >
+                                        <p><%= message.message %></p>
+                                        <span class="time time-left"><%= formatDate(message.created_at) %></span>
+                                    </div>
+                                <% } else { %>
+                                    <div class="message r">
+                                        <img src="/assets/blankpfp.png" alt="Avatar">
+                                        <p><%= message.message %></p>
+                                        <span class="time time-right"><%= formatDate(message.created_at) %></span>
+                                    </div>
+                                <% } %>
+                            <% } %>
+                        <% }); %>
+                    </div>
+                <% } %>
+                <% if (view === 'user') { %>
+                    <div class="chat" style="width:100%; margin:0 auto;"> 
+                        <% messages.forEach(function(message) { %>
+                            <% if (message.message && message.message.trim() !== '') { %> <!-- added condition here -->
+                                <% if (message.sender === 'user') { %>
+                                    <div class="message r">
+                                        <img src="/assets/blankpfp.png" alt="Avatar">
+                                        <p><%= message.message %></p>
+                                        <span class="time time-right"><%= formatDate(message.created_at) %></span>
+                                    </div>
+                                <% } else { %>
+                                    <div class="message l">
+                                        <img src="/assets/purplepfp.jpg" alt="Avatar" >
+                                        <p><%= message.message %></p>
+                                        <span class="time time-left"><%= formatDate(message.created_at) %></span>
+                                    </div>
+                                <% } %>
+                            <% } %>
+                        <% }); %>
+                    </div>
+                <% } %>
+            </div>
+                
+            <form class="message-input-container" enctype="multipart/form-data" action="/project" method="POST" style="width:100%; margin:0 auto;">
+                <textarea class="message-input" name="textMessage" placeholder="Type your message..."></textarea>
+                <input type="hidden" name="view" value="<%= view %>">
+                <input type="hidden" name="projectId" value="<%= projectId %>">
+                <input type="hidden" name="userId" value="<%= userId %>">
+                <button class="btn btn-primary send-message-button" type="submit">Send Message</button>
+            </form>
+            <br/>
+        </div>
+    </div>
+</div>
+
+            <br/>
+            <div id="copied-popup">Link copied to clipboard!</div>
+    
+            <% if (view !== 'user') { %>
+              <br/>
+              <span style="color: gray;"><img src="/assets/logo.png" style="width:150px; height:75px;">Powered By DesignVine</span>
+              <% } %>
+              <div id="imageModal" class="modal">
+                <span class="close">&times;</span>
+                <img class="modal-content" id="modalImage">
+              </div>
+              <script>
+                var modal = document.getElementById("imageModal");
+                var modalImage = document.getElementById("modalImage");
+                var thumbnails = document.querySelectorAll(".img-thumbnail");
+                var close = document.getElementsByClassName("close")[0];
+                
+                // Iterate over all thumbnails
+                thumbnails.forEach(function(thumbnail) {
+                  thumbnail.onclick = function () {
+                    modal.style.display = "block";
+                    if (this.tagName === 'IMG') {
+                      modalImage.src = this.src;
+                    } else if (this.tagName === 'VIDEO') {
+                      var video = document.createElement('video');
+                      video.src = this.src;
+                      video.controls = true;
+                      video.classList.add('modal-content');
+                      modalImage.replaceWith(video);
+                      modalImage = video;
+                    }
+                  };
+                });
+                
+                close.onclick = function () {
+                  modal.style.display = "none";
+                };
+                
+                window.onclick = function (event) {
+                  if (event.target === modal) {
+                    modal.style.display = "none";
+                  }
+                };
+              </script>
+              
+              <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                  var imageContainer = document.querySelector('.image_container');
+                  var sortable = Sortable.create(imageContainer, {
+                    animation: 150
+                  });
+                });
+                document.getElementById('upload-multimedia').addEventListener('change', function() {
+                document.getElementById('upload-multimedia-form').submit();
+                });
+              </script>
+              <script>
+              // copy clipboard link
+              document.getElementById('share-button').addEventListener('click', function() {
+              // Get the current URL
+              var currentUrl = window.location.href;
+    
+              // Find the last slash
+              var lastSlashIndex = currentUrl.lastIndexOf('/');
+    
+              // Cut the string until the last slash
+              var newUrl = currentUrl.substring(0, lastSlashIndex);
+    
+              // Copy to clipboard
+              navigator.clipboard.writeText(newUrl).then(function() {
+                  console.log('Copying to clipboard was successful!');
+                }, function(err) {
+                    console.error('Could not copy text: ', err);
+                });
+              });
+              </script>
+              <script>
+                // share popup
+                document.getElementById('share-button').addEventListener('click', function() {
+                var url = window.location.href;
+                var lastIndex = url.lastIndexOf("/");
+                var finalUrl = url.substring(0, lastIndex);
+                navigator.clipboard.writeText(finalUrl).then(function() {
+                    console.log('URL copied to clipboard');
+                    
+                    // Show the copied popup
+                    var copiedPopup = document.getElementById('copied-popup');
+                    copiedPopup.style.display = 'block';
+                    
+                    // Hide the copied popup after 2 seconds
+                    setTimeout(function() {
+                        copiedPopup.style.display = 'none';
+                    }, 2000);
+                    
+                    }).catch(function(err) {
+                        console.error('Could not copy text: ', err);
+                    });
+                });
+              </script>
+          <script>
+            document.querySelector('#savePageButton').addEventListener('click', function() {
+            let orderedImages = Array.from(document.querySelectorAll('.image_column')).map((imageColumn, index) => {
+                let imgId = imageColumn.querySelector('.editable-text').getAttribute('data-image-id');
+                let imgCaption = imageColumn.querySelector('.editable-text').textContent.trim();
+                return { id: imgId, caption: imgCaption };
+            });
+    
+            fetch('/save-page', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ orderedImages: orderedImages }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                  window.location.reload();
+                } else {
+                    alert('There was an error saving the page. Please try again.');
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        });
+    
+        </script>          
+        <br/>
+        <br/>
+        <br/> 
+        <br/> 
+        <br/>
+        <br/>
+        <br/> 
+        <br/> 
+        <br/> 
+        <br/> 
+        <div class="social d-flex justify-content-center">
+            <a class="mx-2" href="https://instagram.com/designvine.co"><i class="fab fa-instagram"></i></a>
+            <a class="mx-2" href="#!"><i class="fab fa-youtube"></i></a>
+        </div>
+        <!-- Bootstrap core JS-->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Core theme JS-->
+        <script src="js/scripts.js"></script>
+        <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *-->
+        <!-- * *                               SB Forms JS                               * *-->
+        <!-- * * Activate your form at https://startbootstrap.com/solution/contact-forms * *-->
+        <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *-->
+        <script src="https://cdn.startbootstrap.com/sb-forms-latest.js"></script>
+    </body>
+</html>
