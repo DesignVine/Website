@@ -104,25 +104,7 @@ app.get('/users/dashboard', checkNotAuthenticated, async (req,res) => {
         }
     )
 });
-app.get('/users/dashboardtest', checkNotAuthenticated, async (req,res) => {
-    // get list of customers for this user from projects db
-    let projects;
-    pool.query(
-        `SELECT * FROM projects WHERE user_id = $1`,[req.user.id], (err, results)=> {
-            if (err) {
-                throw err;
-            }
-            if (results.rows.length > 0) {
-                projects = results.rows;
-                console.log(projects);
-            }
-            else {
-                console.log("No rows");
-            }
-            res.render("dashboardtest", {user: req.user.firstname, customers: projects, user_id: req.user.id});
-        }
-    )
-});
+
 
 app.get('/project/:projectId', async function(req, res) {
     var projectId = req.params.projectId;
@@ -196,77 +178,6 @@ app.get('/project/:projectId', async function(req, res) {
     )
 });
 
-app.get('/projectTest/:projectId', async function(req, res) {
-    var projectId = req.params.projectId;
-
-    pool.query(
-        `SELECT m.message_id, m.message, m.img, m.caption, m.img_order, m.created_at, m.sender, 
-                u.id as user_id, u.firstname, u.lastname, u.email, u.phone, u.instagram, u.facebook, 
-                u.twitter, u.business_desc, u.profile_photo, u.business_address
-        FROM messages m
-        JOIN projects p ON m.project_id = p.project_id
-        JOIN users u ON p.user_id = u.id
-        WHERE m.project_id = $1
-        ORDER BY m.img_order ASC`, [projectId], (err, results) => {
-            if (err) {
-                res.send('<html><head><title>Error</title></head><body><h1>Error: ProjectID not found</h1></body></html>');            
-            }
-            else if (!results || !results.rows || results.rows.length < 1) {
-                res.send('<html><head><title>Error</title></head><body><h1>Error: ProjectID not found</h1></body></html>');            
-            }
-            else {
-                let textMessages = [];
-                let imageMessages = [];
-                let username = results.rows[0].firstname;
-                let userlastname = results.rows[0].lastname;
-                let email = results.rows[0].email;
-                let phone = results.rows[0].phone;
-                let instagram = results.rows[0].instagram;
-                let facebook = results.rows[0].facebook;
-                let twitter = results.rows[0].twitter;
-                let business_description = results.rows[0].business_desc;
-                let profile_picture;
-
-                try {
-                    profile_picture = results.rows[0].profile_photo.replace(/^.*[\\\/]pfp[\\\/]/, '/pfp/');
-                } catch (err) {
-                    profile_picture = '';  // Or set it to a default image
-                }
-                let business_address = results.rows[0].business_address;
-
-                results.rows.forEach((message) => {
-                  if (message.img === null) {
-                    textMessages.push(message);
-                  } else {
-                    imageMessages.push(message);
-                  }
-                });
-
-                let userId = textMessages[0].user_id;
-                textMessages.sort((a, b) => new Date(b.created_at) + new Date(a.created_at));
-
-                res.render("projectTest", {
-                    formatDate: formatDate,
-                    projectId: projectId, 
-                    userId: userId, 
-                    messages: textMessages, 
-                    images: imageMessages, 
-                    firstname: username, 
-                    lastname: userlastname, 
-                    email: email,
-                    phone: phone, 
-                    instagram: instagram, 
-                    facebook: facebook, 
-                    twitter: twitter, 
-                    business_description: business_description,
-                    profile_picture: profile_picture,
-                    business_address: business_address,
-                    view: "client"
-                });
-            }
-        }
-    )
-});
 
 app.get('/project/:projectId/:userId', async function(req, res) {
 
@@ -347,84 +258,6 @@ app.get('/project/:projectId/:userId', async function(req, res) {
     )
 });
 
-app.get('/projectTest/:projectId/:userId', async function(req, res) {
-
-    var projectId = req.params.projectId;
-
-    pool.query(
-        `SELECT m.message_id, m.message, m.img, m.caption, m.img_order, m.created_at, m.sender, 
-                u.id as user_id, u.firstname as user_firstname, u.lastname as user_lastname, u.email as user_email, 
-                u.phone, u.instagram, u.facebook, u.twitter, u.business_desc, u.profile_photo, u.business_address,
-                p.firstname as project_firstname, p.lastname as project_lastname, p.email as project_email
-        FROM messages m
-        JOIN projects p ON m.project_id = p.project_id
-        JOIN users u ON p.user_id = u.id
-        WHERE m.project_id = $1
-        ORDER BY m.img_order ASC`, [projectId], (err, results) => {
-            if (err) {
-                res.send('<html><head><title>Error</title></head><body><h1>Error: ProjectID not found</h1></body></html>');            
-            }
-            else if (!results || !results.rows || results.rows.length < 1) {
-                res.send('<html><head><title>Error</title></head><body><h1>Error: ProjectID not found</h1></body></html>');            
-            }
-            else {
-                let textMessages = [];
-                let imageMessages = [];
-                let user_firstname = results.rows[0].user_firstname;
-                let user_lastname = results.rows[0].user_lastname;
-                let user_email = results.rows[0].user_email;
-                let project_firstname = results.rows[0].project_firstname;
-                let project_lastname = results.rows[0].project_lastname;
-                let project_email = results.rows[0].project_email;
-                let phone = results.rows[0].phone;
-                let instagram = results.rows[0].instagram;
-                let facebook = results.rows[0].facebook;
-                let twitter = results.rows[0].twitter;
-                let business_description = results.rows[0].business_desc;
-                let profile_picture;
-
-                try {
-                    profile_picture = results.rows[0].profile_photo.replace(/^.*[\\\/]pfp[\\\/]/, '/pfp/');
-                } catch (err) {
-                    profile_picture = '';  // Or set it to a default image
-                }
-                
-                let business_address = results.rows[0].business_address;
-
-                results.rows.forEach((message) => {
-                  if (message.img === null) {
-                    textMessages.push(message);
-                  } else {
-                    imageMessages.push(message);
-                  }
-                });
-                textMessages.sort((a, b) => new Date(b.created_at) + new Date(a.created_at));
-
-                res.render("projectTest", {
-                    formatDate: formatDate,
-                    projectId: projectId, 
-                    userId: req.params.userId, 
-                    messages: textMessages, 
-                    images: imageMessages, 
-                    firstname: user_firstname, 
-                    lastname: user_lastname, 
-                    email: user_email,
-                    project_firstname: project_firstname, 
-                    project_lastname: project_lastname, 
-                    project_email: project_email,
-                    phone: phone, 
-                    instagram: instagram, 
-                    facebook: facebook, 
-                    twitter: twitter, 
-                    business_description: business_description,
-                    profile_picture: profile_picture,
-                    business_address: business_address,
-                    view: "user"
-                });
-            }
-        }
-    )
-});
 
 app.get('/users/logout', (req, res)=> {
     req.logout(function(err) {
