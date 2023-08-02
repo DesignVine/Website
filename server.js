@@ -153,8 +153,10 @@ app.get('/project/:projectId', async function(req, res) {
                 });
 
                 let userId = textMessages[0].user_id;
-                textMessages.sort((a, b) => new Date(b.created_at) + new Date(a.created_at));
+                textMessages.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                textMessages.reverse()
 
+                
                 res.render("project", {
                     formatDate: formatDate,
                     projectId: projectId, 
@@ -230,8 +232,9 @@ app.get('/project/:projectId/:userId', async function(req, res) {
                     imageMessages.push(message);
                   }
                 });
-                textMessages.sort((a, b) => new Date(b.created_at) + new Date(a.created_at));
-
+                textMessages.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                textMessages.reverse()
+                
                 res.render("project", {
                     formatDate: formatDate,
                     projectId: projectId, 
