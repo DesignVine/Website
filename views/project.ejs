@@ -33,8 +33,10 @@
                     </button>
                     <div class="collapse navbar-collapse" id="navbarResponsive">
                         <ul  class="navbar-nav ms-auto">
+                            <% if (view === 'user') { %>
                             <li class="nav-item"><a style="color:black;" class="nav-link" href="/users/dashboard">Dashboard</a></li>
                             <li class="nav-item"><a style="color:black;" class="nav-link" href="/users/logout">Logout</a></li>
+                            <% } %>
                         </ul>
                     </div>
                 </div>
