@@ -1,4 +1,5 @@
 // Business Address: 8 Main St Suite 9A, Jaffrey, NH 03452
+// process.env.TZ = 'EST'; // REQUIRED ON SERVER
 
 const express = require("express");
 const app = express();
@@ -359,19 +360,19 @@ app.post('/project', async function(req, res) {
             const { user_email, project_email } = results.rows[0];
             const recipientEmail = (sender === 'user') ? project_email : user_email;
             const emailSender = (sender === 'user') ? user_email : project_email;
-    
+            const link = (sender === 'user') ? `https://designvine.co/project/${pid}` : `https://designvine.co/project/${pid}/${user_id}`;
             // Determine the email content
             let emailContent;
             let subject;
             if (textMessageAdded && !imageMessageAdded) {
-                emailContent = `New message sent by ${emailSender}: ${message}`;
+                emailContent = `New message sent by ${emailSender}: ${message}. Check it out here ${link}`;
                 subject = 'New message received';
             } else if (!textMessageAdded && imageMessageAdded) {
                 subject = 'New images added to your project'
-                emailContent = `New images added by: ${emailSender}`;
+                emailContent = `New images added by: ${emailSender}. Check it out here ${link}`;
             } else {
                 subject = "A new message and images have been added to your project";
-                emailContent = `A new message and images have been added to the project by: ${emailSender}. Check it out!`;
+                emailContent = `A new message and images have been added to the project by: ${emailSender}. Check it out here ${link}`;
             }
     
             // Send the email notification
@@ -679,17 +680,20 @@ app.listen(PORT, ()=>{
 
 //helpers:
 
-function formatDate(dateString) {
-    const date = new Date(dateString);
-    const day = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()];
-    const month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][date.getMonth()];
-    const dateOfMonth = date.getDate();
-    const year = date.getFullYear();
-    let hours = date.getHours();
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12;
-    hours = hours ? hours : 12; // the hour '0' should be '12'
-    const minutes = ('0' + date.getMinutes()).slice(-2);
+const moment = require('moment-timezone');
 
-    return `${day} ${month} ${dateOfMonth} ${year} ${hours}:${minutes} ${ampm}`;
-  }
+function formatDate(dateString) {
+  const date = moment.tz(dateString, "America/New_York");
+
+  const day = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.day()];
+  const month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][date.month()];
+  const dateOfMonth = date.date();
+  const year = date.year();
+  let hours = date.hours();
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  hours = hours ? hours : 12; // the hour '0' should be '12'
+  const minutes = ('0' + date.minutes()).slice(-2);
+
+  return `${day} ${month} ${dateOfMonth} ${year} ${hours}:${minutes} ${ampm}`;
+}
