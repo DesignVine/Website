@@ -34,7 +34,12 @@ list-style-type: none;
 }
 }
 
-
+@media (max-width: 767px) {
+  .btn {
+      font-size: 14px; /* You can adjust this value as needed */
+      padding: 6px 12px; /* You can adjust this value as needed */
+  }
+}
 
 .image_column {
   float: left;
