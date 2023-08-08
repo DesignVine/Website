@@ -200,7 +200,62 @@ app.get('/project/:projectId/:userId', async function(req, res) {
                 res.send('<html><head><title>Error</title></head><body><h1>Error: ProjectID not found</h1></body></html>');            
             }
             else if (!results || !results.rows || results.rows.length < 1) {
-                res.send('<html><head><title>Error</title></head><body><h1>Error: ProjectID not found</h1></body></html>');            
+                // Query to get the project and user details without joining the messages table
+                pool.query(
+                    `SELECT u.id as user_id, u.firstname as user_firstname, u.lastname as user_lastname, u.email as user_email,
+                             u.phone, u.instagram, u.facebook, u.twitter, u.business_desc, u.profile_photo, u.business_address,
+                             p.firstname as project_firstname, p.lastname as project_lastname, p.email as project_email
+                     FROM projects p
+                     JOIN users u ON p.user_id = u.id
+                     WHERE p.project_id = $1`, [projectId], (err, projectResults) => {
+                        if (err || !projectResults || !projectResults.rows || projectResults.rows.length < 1) {
+                            res.send('<html><head><title>Error</title></head><body><h1>Error: ProjectID not found</h1></body></html>');
+                        } else {
+                            let user_firstname = projectResults.rows[0].user_firstname;
+                            let user_lastname = projectResults.rows[0].user_lastname;
+                            let user_email = projectResults.rows[0].user_email;
+                            let project_firstname = projectResults.rows[0].project_firstname;
+                            let project_lastname = projectResults.rows[0].project_lastname;
+                            let project_email = projectResults.rows[0].project_email;
+                            let phone = projectResults.rows[0].phone;
+                            let instagram = projectResults.rows[0].instagram;
+                            let facebook = projectResults.rows[0].facebook;
+                            let twitter = projectResults.rows[0].twitter;
+                            let business_description = projectResults.rows[0].business_desc;
+                            let profile_picture;
+            
+                            try {
+                                profile_picture = projectResults.rows[0].profile_photo.replace(/^.*[\\\/]pfp[\\\/]/, '/pfp/');
+                            } catch (err) {
+                                profile_picture = '';  // Or set it to a default image
+                            }
+            
+                            let business_address = projectResults.rows[0].business_address;
+            
+                            res.render("project", {
+                                formatDate: formatDate,
+                                projectId: projectId,
+                                userId: req.params.userId,
+                                messages: [], // Empty messages
+                                images: [], // Empty images
+                                firstname: user_firstname,
+                                lastname: user_lastname,
+                                email: user_email,
+                                project_firstname: project_firstname,
+                                project_lastname: project_lastname,
+                                project_email: project_email,
+                                phone: phone,
+                                instagram: instagram,
+                                facebook: facebook,
+                                twitter: twitter,
+                                business_description: business_description,
+                                profile_picture: profile_picture,
+                                business_address: business_address,
+                                view: "user"
+                            });
+                        }
+                    }
+                );
             }
             else {
                 let textMessages = [];
