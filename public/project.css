@@ -36,8 +36,8 @@ list-style-type: none;
 
 @media (max-width: 767px) {
   .btn {
-      font-size: 14px; /* You can adjust this value as needed */
-      padding: 6px 12px; /* You can adjust this value as needed */
+      font-size: 12px; /* You can adjust this value as needed */
+      padding: 4px 10px; /* You can adjust this value as needed */
   }
 }
 
@@ -135,7 +135,7 @@ list-style-type: none;
 }
 
 .message.r {
-  background-color: #1982FC;
+  background-color: #4059AD;
   color: #fff;
   margin-left: auto;
   width: 65%;
@@ -167,7 +167,7 @@ list-style-type: none;
     width: 0;
     height: 0;
     border: 5px solid transparent;
-    border-left-color: #1982FC;
+    border-left-color: #4059AD;
     border-right: 0;
     border-bottom: 0;
     margin-top: -5px;
@@ -338,7 +338,7 @@ text-decoration: none;
   margin-left: 1rem;
   padding: 0.5rem 1rem;
   border: none;
-  background-color: #1982FC;
+  background-color: #4059AD;
   color: white;
   cursor: pointer;
   border-radius: 5px;
