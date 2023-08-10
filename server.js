@@ -476,12 +476,12 @@ app.post('/project', async function(req, res) {
             let subject;
             if (textMessageAdded && !imageMessageAdded) {
                 emailContent = `New message sent by ${emailSender}: ${message}. Check it out here ${link}`;
-                subject = 'New message received';
+                subject = 'Do Not Reply - New message received';
             } else if (!textMessageAdded && imageMessageAdded) {
-                subject = 'New images added to your project'
+                subject = 'Do Not Reply - New images added to your project'
                 emailContent = `New images added by: ${emailSender}. Check it out here ${link}`;
             } else {
-                subject = "A new message and images have been added to your project";
+                subject = "Do Not Reply - A new message and images have been added to your project";
                 emailContent = `A new message and images have been added to the project by: ${emailSender}. Check it out here ${link}`;
             }
     
