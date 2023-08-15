@@ -1,3 +1,4 @@
+
 CREATE DATABASE designvine;
 
 CREATE TABLE users (

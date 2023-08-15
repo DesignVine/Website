@@ -384,7 +384,9 @@ app.get('/users/logout', (req, res)=> {
 app.get('/users/project', (req,res) => {
     res.render("project");
 });
-
+app.get('/users/howitworks', (req,res) => {
+    res.render("howitworks");
+});
 app.post('/project', async function(req, res) {
 
     let sampleFile;

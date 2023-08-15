@@ -6,6 +6,7 @@
         <meta name="description" content="" />
         <meta name="author" content="" />
         <title>DesignVine</title>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <!-- Font Awesome icons (free version)-->
         <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
         <!-- Google fonts-->
@@ -14,6 +15,9 @@
         <!-- Core theme CSS (includes Bootstrap)-->
         <link href="/homepage.css" rel="stylesheet" />
         <link rel="stylesheet" href="/style.css">
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
+
+        <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
 
         <link rel="icon" type="image/x-icon" href="/assets/favicon.png">
     </head>
@@ -40,18 +44,32 @@
         <section class="projects-section bg-light" id="projects">
             <div class="row mx-auto">
                 <div class="column left " name = "customers">
-                    <h3 style="margin-left:15%; text-decoration: underline;" >Customers</h3>
+                    <h3 style="margin-left:15%;" >Customers</h3>
                     <table id="customerTable" style="margin-left:18%; color: #1eaedb" >
                         <% if (typeof customers != 'undefined') { %>
                             <% customers.forEach(customer =>{%>
-                                    <tr><td>
-                                        <span id ="<%= customer.project_id %>" class="delete-icon"style="color:lightgrey;"><i class="fa fa-trash delete-icon__icon" aria-hidden="true"></i>
-                                        </span>
-                                        <a href="/project/<%= customer.project_id %>/<%= user_id %>">&nbsp;<%= customer.firstname %>&nbsp;<%= customer.lastname %></a></td></tr>
-                                
+                                    <tr>
+                                        <td>
+                                            <span id ="<%= customer.project_id %>" class="delete-icon"style="color:lightgrey;">
+                                                <i class="fa fa-trash delete-icon__icon" aria-hidden="true"></i>
+                                            </span>
+                                            <a href="/project/<%= customer.project_id %>/<%= user_id %>">&nbsp;<%= customer.firstname %>&nbsp;<%= customer.lastname %></a>
+                    
+                                            <!-- Dropdown Menu -->
+                                            <div class="dropdown">
+                                                <i class="fa fa-ellipsis-h" aria-hidden="true" data-bs-toggle="dropdown"></i>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" href="#">Permanently Delete</a></li>
+                                                    <li><a class="dropdown-item" href="#">Archive</a></li>
+                                                    <li><a class="dropdown-item" href="#">Star</a></li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
                             <% }) %>
                         <%} %>
                     </table>
+                    
                 </div>
     
                 <div class="column right" name="add customer">
@@ -63,7 +81,7 @@
                             <% }) %>
                         <%} %>
                     </ul>
-                    <h3 style="text-decoration: underline;">New Project</h3>
+                    <h3 >New Project</h3>
                     <form style="text-align: left;" enctype="multipart/form-data" action="/users/dashboard" method ="POST">
                         <div>
                             <input type="text" id ="firstname" name = "firstname" placeholder = "Customer First Name" required /> *
@@ -97,7 +115,44 @@
                     </div>
                 </div>
             </div>
+            <style>
+                .dataTables_length,  /* Hide 'show x entries' dropdown */
+                .dataTables_filter,  /* Hide search box */
+                .dataTables_info,    /* Hide 'showing x to y of z' info */
+                .dataTables_paginate /* Hide pagination controls */
+                {
+                    display: none !important;
+
+                }
+                #customerTable,              /* The table itself */
+                #customerTable thead,        /* Header section */
+                #customerTable tbody,        /* Body section */
+                #customerTable tr,           /* Each row */
+                #customerTable td,           /* Each data cell */
+                #customerTable th            /* Each header cell */
+                {
+                    background-color: inherit;  /* Take the color from the parent */
+                    border: none !important;  /* Remove the borders */
+
+                }
+                
+            </style>
+            
             <script>
+
+                $(document).ready(function() {
+                    $('#customerTable').DataTable({
+                        "paging": false,         // Disable pagination
+                        "info": false,           // Disable showing "Showing x to y of z entries"
+                        "searching": false,      // Disable the search box
+                        "columnDefs": [
+                            { "orderable": true, "targets": [0] }  // 0 represents the first column
+                        ]
+                    });
+                });
+
+
+
                 document.querySelectorAll(".drop-zone__input").forEach((inputElement) => {
                     const dropZoneElement = inputElement.closest(".drop-zone");
     
