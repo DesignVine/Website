@@ -27,15 +27,25 @@ const transporter = nodemailer.createTransport({
 });
 //Company Name - Subject Link - Message
 // Customer Name, Message, Timestamp
-async function sendNotificationEmail(to, subject, text) {
+async function sendNotificationEmail(to, cc, subject, text) {
     try {
-      const mailOptions = {
-        from: 'designvine@zohomail.com',
-        to: to,
-        subject: subject,
-        text: text,
-      };
-  
+        let mailOptions = {}
+        if(cc !== '') {
+            mailOptions = {
+                from: 'designvine@zohomail.com',
+                to: to,
+                cc: cc,
+                subject: subject,
+                text: text,
+            };
+        } else {
+            mailOptions = {
+                from: 'designvine@zohomail.com',
+                to: to,
+                subject: subject,
+                text: text,
+            };
+        }
       const info = await transporter.sendMail(mailOptions);
       console.log('Email sent:', info.response);
     } catch (error) {
@@ -468,31 +478,34 @@ app.post('/project', async function(req, res) {
             if (err) {
                 throw err;
             }
-    
-            const { user_email, project_email } = results.rows[0];
-            const recipientEmail = (sender === 'user') ? project_email : user_email;
-            const emailSender = (sender === 'user') ? user_email : project_email;
-            const link = (sender === 'user') ? `https://designvine.co/project/${pid}` : `https://designvine.co/project/${pid}/${user_id}`;
-            // Determine the email content
+            let recipientEmail;
             let emailContent;
             let subject;
-            if (textMessageAdded && !imageMessageAdded) {
-                emailContent = `New message sent by ${emailSender}: ${message}. Check it out here ${link}`;
-                subject = 'Do Not Reply - New message received';
-            } else if (!textMessageAdded && imageMessageAdded) {
-                subject = 'Do Not Reply - New images added to your project'
-                emailContent = `New images added by: ${emailSender}. Check it out here ${link}`;
-            } else {
-                subject = "Do Not Reply - A new message and images have been added to your project";
-                emailContent = `A new message and images have been added to the project by: ${emailSender}. Check it out here ${link}`;
-            }
-    
-            // Send the email notification
+            if (sender !== 'user') {
+                const { user_email, project_email } = results.rows[0];
+                recipientEmail = (sender === 'user') ? project_email : user_email;
+                const emailSender = (sender === 'user') ? user_email : project_email;
+                const link = (sender === 'user') ? `https://designvine.co/project/${pid}` : `https://designvine.co/project/${pid}/${user_id}`;
+                // Determine the email content
+
+                if (textMessageAdded && !imageMessageAdded) {
+                    emailContent = `New message sent by ${emailSender}: ${message}. Check it out here ${link}`;
+                    subject = 'Do Not Reply - New message received';
+                } else if (!textMessageAdded && imageMessageAdded) {
+                    subject = 'Do Not Reply - New images added to your project'
+                    emailContent = `New images added by: ${emailSender}. Check it out here ${link}`;
+                } else {
+                    subject = "Do Not Reply - A new message and images have been added to your project";
+                    emailContent = `A new message and images have been added to the project by: ${emailSender}. Check it out here ${link}`;
+                }
+                            // Send the email notification
             sendNotificationEmail(
                 recipientEmail,
                 subject,
                 emailContent
             );
+            }
+
         }
     );
     
@@ -771,6 +784,38 @@ app.delete('/delete-project/:projectId', async (req, res) => {
       res.status(500).send('Failed to delete the project.'); // Send an error status code and message
     }
   });
+
+  app.post('/subscribe', async (req, res) => {
+    const email = req.body.email;
+  
+    if (!email) {
+      return res.redirect('/?error=Email is required');
+    }
+  
+    try {
+      await pool.query('INSERT INTO emails(email) VALUES($1)', [email]);
+      res.redirect('/?success=Subscription successful');
+    } catch (error) {
+      console.error(error);
+      res.redirect('/?error=Server error');
+    }
+  });
+  
+  app.post('/sendEmail', (req, res) => {
+    // Extract email data from the request
+    const { sender, recipient, url } = req.body;
+
+    let subject = "Changes made in your project!";
+    let emailContent = `New content has been added to your project by: ${sender}. Check it out here ${url}`
+
+    // Send the email notification
+    sendNotificationEmail(
+        recipient,
+        sender,
+        subject,
+        emailContent
+    );
+});
   
 function checkAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {

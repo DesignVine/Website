@@ -80,9 +80,9 @@
                 <% } %>
                 <br/>
                 <% if (view === 'user') { %>
-                    <button style="color:black" class="btn btn-primary share-btn" id="savePageButton">Save</button>
-                    <br/>
                     <button style="color:black" class="btn btn-primary share-btn" id="share-button">Share with customer</button>
+                    <br/>
+                    <button id="customerViewButton" onclick="openCustomerView()" style="color:black" class="btn btn-primary share-btn" >Customer View</button>
                 <% } %>
             </div>
             <br/>
@@ -182,7 +182,7 @@
 </div>
 
             <br/>
-            <div id="copied-popup">Link copied to clipboard!</div>
+            <div id="copied-popup">Email Sent to Customer!</div>
     
 
               <div id="imageModal" class="modal">
@@ -315,7 +315,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 var lastIndex = url.lastIndexOf("/");
                 var finalUrl = url.substring(0, lastIndex);
                 navigator.clipboard.writeText(finalUrl).then(function() {
-                    console.log('URL copied to clipboard');
+                    console.log('Email Sent to Customer!');
                     
                     // Show the copied popup
                     var copiedPopup = document.getElementById('copied-popup');
@@ -331,34 +331,48 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                 });
               </script>
-          <script>
-            document.querySelector('#savePageButton').addEventListener('click', function() {
-            let orderedImages = Array.from(document.querySelectorAll('.image_column')).map((imageColumn, index) => {
-                let imgId = imageColumn.querySelector('.editable-text').getAttribute('data-image-id');
-                let imgCaption = imageColumn.querySelector('.editable-text').textContent.trim();
-                return { id: imgId, caption: imgCaption };
-            });
-    
-            fetch('/save-page', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ orderedImages: orderedImages }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                  window.location.reload();
-                } else {
-                    alert('There was an error saving the page. Please try again.');
+            <% if (view === 'user') { %>
+
+              <script>
+                // This is a basic example. You'll need to integrate it with your frontend framework.
+                document.getElementById('share-button').addEventListener('click', function() {
+                    var url = window.location.href;
+                    var lastIndex = url.lastIndexOf("/");
+                    var finalUrl = url.substring(0, lastIndex);
+                    // Gather necessary data for the email
+                    // Extract email values from the EJS template
+                    const senderEmail = '<%= email %>';
+                    const recipientEmail = '<%= project_email %>';
+
+                    // Gather necessary data for the email
+                    const emailData = {
+                        sender: senderEmail,
+                        recipient: recipientEmail,
+                        url: finalUrl
+                        // ... (any other data you need)
+                    };
+
+                    // Make a POST request to send the email
+                    fetch('/sendEmail', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(emailData)
+                    }).then(response => response.json()).then(data => {
+                        // Handle the response (e.g., show a success message)
+                    });
+                });
+              </script> 
+              <script>
+                function openCustomerView() {
+                    var url = window.location.href;
+                    var lastIndex = url.lastIndexOf("/");
+                    var finalUrl = url.substring(0, lastIndex);
+                    window.open(finalUrl, '_blank');
                 }
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
-        });
-        </script>        
+            </script>
+            <% } %>
         <br/>
         <br/>
         <br/> 
