@@ -189,6 +189,59 @@
                 <span class="close">&times;</span>
                 <img class="modal-content" id="modalImage">
               </div>
+
+              <script>
+                // Debounce function
+                function debounce(func, wait) {
+                    let timeout;
+                    return function(...args) {
+                        clearTimeout(timeout);
+                        timeout = setTimeout(() => func.apply(this, args), wait);
+                    };
+                }
+    
+                // Autosave function (adapted from your save function)
+                function autosave() {
+                    let orderedImages = Array.from(document.querySelectorAll('.image_column')).map((imageColumn, index) => {
+                        let imgId = imageColumn.querySelector('.editable-text').getAttribute('data-image-id');
+                        let imgCaption = imageColumn.querySelector('.editable-text').textContent.trim();
+                        return { id: imgId, caption: imgCaption };
+                    });
+    
+                    fetch('/save-page', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ orderedImages: orderedImages }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            console.log('Autosaved successfully');
+                        } else {
+                            console.error('Autosave failed');
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                    });
+                }
+    
+                // Attach event listener for text changes to all .editable-text elements
+                document.querySelectorAll('.editable-text').forEach(textElement => {
+                    textElement.addEventListener('input', debounce(autosave, 2000));
+                });
+                // Initialize Sortable and attach autosave on drag end
+document.addEventListener('DOMContentLoaded', function() {
+  var imageContainer = document.querySelector('.image_container');
+  var sortable = Sortable.create(imageContainer, {
+    animation: 150,
+    onEnd: debounce(autosave, 2000)  // Autosave when dragging ends
+  });
+});
+            </script>  
+
               <script>
                 var modal = document.getElementById("imageModal");
                 var modalImage = document.getElementById("modalImage");
@@ -227,7 +280,8 @@
                 document.addEventListener('DOMContentLoaded', function() {
                   var imageContainer = document.querySelector('.image_container');
                   var sortable = Sortable.create(imageContainer, {
-                    animation: 150
+                    animation: 150,
+                    onEnd: debounce(autosave, 2000) 
                   });
                 });
                 document.getElementById('upload-multimedia').addEventListener('change', function() {
@@ -304,8 +358,7 @@
                 console.error('Error:', error);
             });
         });
-    
-        </script>          
+        </script>        
         <br/>
         <br/>
         <br/> 
