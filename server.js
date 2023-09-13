@@ -99,6 +99,7 @@ app.get('/users/settings', checkNotAuthenticated, (req,res) => {
 app.get('/users/dashboard', checkNotAuthenticated, async (req,res) => {
     // get list of customers for this user from projects db
     let projects;
+    let groupedProjects = {};
     pool.query(
         `SELECT * FROM projects WHERE user_id = $1`,[req.user.id], (err, results)=> {
             if (err) {
@@ -107,11 +108,23 @@ app.get('/users/dashboard', checkNotAuthenticated, async (req,res) => {
             if (results.rows.length > 0) {
                 projects = results.rows;
                 console.log(projects);
+                projects.forEach(project => {
+                    let key = project.firstname + ' ' + project.lastname;
+                    if (!groupedProjects[key]) {
+                        groupedProjects[key] = {
+                            firstname: project.firstname,
+                            lastname: project.lastname,
+                            email: project.email,
+                            projects: []
+                        };
+                    }
+                    groupedProjects[key].projects.push(project);
+                });
             }
             else {
                 console.log("No rows");
             }
-            res.render("dashboard", {user: req.user.firstname, customers: projects, user_id: req.user.id});
+            res.render("dashboard", {user: req.user.firstname, customers: projects, groupedProjects: Object.values(groupedProjects), user_id: req.user.id});
         }
     )
 });

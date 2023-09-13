@@ -21,6 +21,7 @@
 
         <link rel="icon" type="image/x-icon" href="/assets/favicon.png">
     </head>
+    
     <body id="page-top">
         <!-- Navigation-->
         <div >
@@ -40,30 +41,42 @@
             </div>
         </nav>
         </div>
+
         <!-- Projects-->
         <section class="projects-section bg-light" id="projects">
             <div class="row mx-auto">
                 <div class="column left " name = "customers">
                     <h3 style="margin-left:15%;" >Customers</h3>
                     <table id="customerTable" style="margin-left:18%; color: #1eaedb" >
-                        <% if (typeof customers != 'undefined') { %>
-                            <% customers.forEach(customer =>{%>
-                                    <tr>
-                                        <td>
-                                            <a href="/project/<%= customer.project_id %>/<%= user_id %>">&nbsp;<%= customer.firstname %>&nbsp;<%= customer.lastname %></a>
-                                            <!-- Dropdown Menu -->
-                                            <div class="dropdown">
-                                                <i class="fa fa-ellipsis-h" aria-hidden="true" data-bs-toggle="dropdown"></i>
-                                                <ul class="dropdown-menu">
-                                                    <li><a class="dropdown-item delete-icon" href="#" id ="<%= customer.project_id %>">Permanently Delete</a></li>
-                                                    <li><a class="dropdown-item" href="#">Archive</a></li>
-                                                    <li><a class="dropdown-item" href="#">Star</a></li>
-                                                </ul>
-                                            </div>
-                                        </td>
-                                    </tr>
+                        <% if (groupedProjects && groupedProjects.length > 0) { %>
+                            <% groupedProjects.forEach(customer => { %>
+                                <tr>
+                                    <td>
+                                        <strong><%= customer.firstname %> <%= customer.lastname %></strong>
+                                    </td>
+                                </tr>
+                                <% if (customer.projects && customer.projects.length > 0) { %>
+                                    <% customer.projects.forEach(project => { %>
+                                        <tr>
+                                            <td>
+                                                <a href="/project/<%= project.project_id %>/<%= user_id %>"><%= project.description %></a>
+                                                <!-- Dropdown Menu -->
+                                                <div class="dropdown">
+                                                    <i class="fa fa-ellipsis-h" aria-hidden="true" data-bs-toggle="dropdown"></i>
+                                                    <ul class="dropdown-menu">
+                                                        <li><a class="dropdown-item delete-icon" href="#" id ="<%= project.project_id %>">Permanently Delete</a></li>
+                                                        <li><a class="dropdown-item" href="#">Archive</a></li>
+                                                        <li><a class="dropdown-item" href="#">Star</a></li>
+                                                    </ul>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <% }) %>
+                                <% } %>
                             <% }) %>
-                        <%} %>
+                        <% } else { %>
+                            <p>No customers or projects found.</p>
+                        <% } %>
                     </table>
                 </div>
                 <div class="column right" name="add customer">
