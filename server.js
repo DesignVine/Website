@@ -514,7 +514,7 @@ app.post('/project', async function(req, res) {
 
 
 app.post('/users/dashboard', async (req, res) => {
-    let { firstname, lastname, email, description, message} = req.body;
+    let { project_name, firstname, lastname, email, description, message} = req.body;
     let sampleFile;
     let uploadPath;
     let pid;
@@ -523,8 +523,8 @@ app.post('/users/dashboard', async (req, res) => {
     }
     else {
         pool.query(
-            `INSERT INTO projects (user_id, firstname, lastname, email, description)
-            VALUES ($1, $2, $3, $4, $5) RETURNING project_id`, [req.user.id, firstname, lastname, email, description ], (err, results)=> {
+            `INSERT INTO projects (user_id, firstname, lastname, email, description, project_name)
+            VALUES ($1, $2, $3, $4, $5, $6) RETURNING project_id`, [req.user.id, firstname, lastname, email, description, project_name ], (err, results)=> {
                 if (err) {
                     throw err;
                 }
