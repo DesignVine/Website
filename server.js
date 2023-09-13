@@ -690,7 +690,7 @@ app.post('/users/login', passport.authenticate('local', {
 }));
 
 app.post('/users/settings', async (req, res) => {
-    const { email, tel, instagram, facebook, twitter, desc, businessAddress, files } = req.body;
+    const { email, tel, instagram, facebook, twitter, desc, businessAddress,businessName, files } = req.body;
     let user_id = req.user.id;
 
     // Object to store the fields to update
@@ -703,6 +703,7 @@ app.post('/users/settings', async (req, res) => {
     if (twitter) fieldsToUpdate.twitter = twitter;
     if (desc) fieldsToUpdate.business_desc = desc;
     if (businessAddress) fieldsToUpdate.business_address = businessAddress;
+    if (businessName) fieldsToUpdate.business_name = businessName;
 
     try {
         // Get a client from the connection pool

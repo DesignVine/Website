@@ -253,6 +253,54 @@
                   });
                 });
               </script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const customerMap = {};
+
+                // Group customers by name
+                const rows = document.querySelectorAll("#customerTable tr");
+                rows.forEach(row => {
+                    const anchor = row.querySelector("a");
+                    const name = anchor.textContent.trim();
+
+                    if (!customerMap[name]) {
+                        customerMap[name] = [];
+                    }
+                    customerMap[name].push(anchor.href);
+                });
+
+                // Clear the table
+                const table = document.querySelector("#customerTable");
+                while (table.firstChild) {
+                    table.removeChild(table.firstChild);
+                }
+
+                // Populate the table with grouped data
+                for (const [name, projects] of Object.entries(customerMap)) {
+                    const row = document.createElement("tr");
+                    const cell = document.createElement("td");
+
+                    const nameElement = document.createElement("strong");
+                    nameElement.textContent = name;
+                    cell.appendChild(nameElement);
+
+                    const projectList = document.createElement("ul");
+                    projects.forEach(project => {
+                        const listItem = document.createElement("li");
+                        const projectLink = document.createElement("a");
+                        projectLink.href = project;
+                        projectLink.textContent = "Project";
+                        listItem.appendChild(projectLink);
+                        projectList.appendChild(listItem);
+                    });
+
+                    cell.appendChild(projectList);
+                    row.appendChild(cell);
+                    table.appendChild(row);
+                }
+            });
+
+        </script>
         </section>
         <!-- Bootstrap core JS-->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
