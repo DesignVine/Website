@@ -101,7 +101,7 @@ app.get('/users/dashboard', checkNotAuthenticated, async (req,res) => {
     let projects;
     let groupedProjects = {};
     pool.query(
-        `SELECT * FROM projects WHERE user_id = $1`,[req.user.id], (err, results)=> {
+        `SELECT * FROM projects WHERE user_id = $1 ORDER BY star DESC, project_id ASC`,[req.user.id], (err, results)=> {
             if (err) {
                 throw err;
             }
@@ -830,7 +830,23 @@ app.delete('/delete-project/:projectId', async (req, res) => {
         emailContent
     );
 });
-  
+app.post('/toggle-star/:projectId', async (req, res) => {
+    const projectId = req.params.projectId;
+    const { star } = req.body; // New star status
+    
+    try {
+        await pool.query(
+            'UPDATE projects SET star = $1 WHERE project_id = $2',
+            [star, projectId]
+        );
+        res.json({ success: true });
+    } catch (err) {
+        console.error(err);
+        res.json({ success: false });
+    }
+});
+
+
 function checkAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
         return res.redirect('/users/dashboard');

@@ -21,7 +21,12 @@
 
         <link rel="icon" type="image/x-icon" href="/assets/favicon.png">
     </head>
-    
+    <style>
+        td .star-icon {
+            color: gold;
+            margin-right: 5px;
+        }
+    </style>
     <body id="page-top">
         <!-- Navigation-->
         <div >
@@ -53,6 +58,7 @@
                             <% groupedProjects.forEach(customer => { %>
                                 <tr>
                                     <td style="color:black">
+
                                         <strong ><%= customer.firstname %> <%= customer.lastname %></strong>
                                     </td>
                                 </tr>
@@ -60,6 +66,9 @@
                                     <% customer.projects.forEach(project => { %>
                                         <tr>
                                             <td>
+                                                <% if (project.star) { %>
+                                                    ★ <!-- This is the star icon -->
+                                                <% } %>
                                                 <a href="/project/<%= project.project_id %>/<%= user_id %>"><%= project.description %></a>
                                                 <!-- Dropdown Menu -->
                                                 <div class="dropdown">
@@ -67,7 +76,12 @@
                                                     <ul class="dropdown-menu">
                                                         <li><a class="dropdown-item delete-icon" href="#" id ="<%= project.project_id %>">Permanently Delete</a></li>
                                                         <li><a class="dropdown-item" href="#">Archive</a></li>
-                                                        <li><a class="dropdown-item" href="#">Star</a></li>
+                                                        <li>
+                                                            <a class="dropdown-item toggle-star" href="#" data-project-id="<%= project.project_id %>" data-starred="<%= project.star %>">
+                                                                <%= project.star ? 'Unstar' : 'Star' %>
+                                                            </a>
+                                                        </li>
+                                                        
                                                     </ul>
                                                 </div>
                                             </td>
@@ -150,6 +164,30 @@
                 }
                 
             </style>
+            <script>
+                document.querySelectorAll('.toggle-star').forEach(item => {
+                    item.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const projectId = e.target.getAttribute('data-project-id');
+                        const isStarred = e.target.getAttribute('data-starred') === 'true';
+                        
+                        fetch(`/toggle-star/${projectId}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ star: !isStarred })
+                        }).then(response => response.json()).then(data => {
+                            if (data.success) {
+                                window.location.reload(); // Reload to reflect the changes
+                            } else {
+                                alert('Error toggling the star status.');
+                            }
+                        });
+                    });
+                });
+            </script>
+
             
             <script>
 

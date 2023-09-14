@@ -186,7 +186,7 @@
     
 
               <div id="imageModal" class="modal">
-                <span class="close">&times;</span>
+                <span class="close"></span>
                 <img class="modal-content" id="modalImage">
               </div>
 
@@ -233,13 +233,13 @@
                     textElement.addEventListener('input', debounce(autosave, 2000));
                 });
                 // Initialize Sortable and attach autosave on drag end
-document.addEventListener('DOMContentLoaded', function() {
-  var imageContainer = document.querySelector('.image_container');
-  var sortable = Sortable.create(imageContainer, {
-    animation: 150,
-    onEnd: debounce(autosave, 2000)  // Autosave when dragging ends
-  });
-});
+                document.addEventListener('DOMContentLoaded', function() {
+                var imageContainer = document.querySelector('.image_container');
+                var sortable = Sortable.create(imageContainer, {
+                    animation: 150,
+                    onEnd: debounce(autosave, 2000)  // Autosave when dragging ends
+                });
+                });
             </script>  
 
               <script>
