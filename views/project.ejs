@@ -170,7 +170,7 @@
             </div>
                 
             <form class="message-input-container" enctype="multipart/form-data" action="/project" method="POST" style="width:100%; margin:0 auto;">
-                <textarea class="message-input" name="textMessage" placeholder="Type your message..."></textarea>
+                <textarea class="message-input" name="textMessage" placeholder="Type your message..." oninput="adjustHeight(this)"></textarea>
                 <input type="hidden" name="view" value="<%= view %>">
                 <input type="hidden" name="projectId" value="<%= projectId %>">
                 <input type="hidden" name="userId" value="<%= userId %>">
@@ -189,7 +189,12 @@
                 <span class="close"></span>
                 <img class="modal-content" id="modalImage">
               </div>
-
+              <script>
+                function adjustHeight(textarea) {
+                    textarea.style.height = 'auto'; // Reset the height
+                    textarea.style.height = (textarea.scrollHeight) + 'px'; // Set it to its scroll height
+                }
+            </script>
               <script>
                 // Debounce function
                 function debounce(func, wait) {
