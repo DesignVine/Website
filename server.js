@@ -93,7 +93,20 @@ app.get('/users/login', checkAuthenticated, (req,res) => {
 });
 
 app.get('/users/settings', checkNotAuthenticated, (req,res) => {
-    res.render("settings");
+    pool.query(
+        `SELECT * FROM users WHERE id = $1`,[req.user.id], (err, results)=> {
+            if (err) {
+                throw err;
+            }
+            if (results.rows.length > 0) {
+                console.log(results.rows);
+            }
+            else {
+                console.log("No rows");
+            }
+            res.render("settings", {user: results.rows[0]});
+        }
+    )
 });
 
 app.get('/users/dashboard', checkNotAuthenticated, async (req,res) => {

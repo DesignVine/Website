@@ -70,28 +70,24 @@
             <form action="/users/settings" enctype="multipart/form-data" method="POST">
                 <!-- Personal Information -->
                 <h4>Personal Information</h4>
-                <input type="text" id="businessName" name="businessName" placeholder="Business Name" />
-                <input type="text" id="email" name="email" placeholder="Update E-Mail" />
-                <input type="tel" name="tel" placeholder="Phone # 111-222-3333" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" maxlength="12">
-                <textarea id="desc" name="desc" placeholder="Business Description"></textarea>
+                <input type="text" id="businessName" name="businessName" placeholder="Business Name" value="<%= user.business_name %>" />
+                <input type="text" id="email" name="email" placeholder="Update E-Mail" value="<%= user.email %>" />
+                <input type="tel" name="tel" placeholder="Phone # 111-222-3333" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" maxlength="12" value="<%= user.phone %>">
+                <textarea id="desc" name="desc" placeholder="Business Description"><%= user.business_desc %></textarea>
                 
-                <br/>
-
                 <!-- Social Media Links -->
                 <h4>Social Media</h4>
-                <input type="text" id="website" name="website" placeholder="Website" />
-                <input type="text" id="instagram" name="instagram" placeholder="Instagram" />
-                <input type="text" id="facebook" name="facebook" placeholder="Facebook" />
-                <input type="text" id="twitter" name="twitter" placeholder="Twitter" />
-
-                <br/>
+                <input type="text" id="website" name="website" placeholder="Website" value="<%= user.website %>" />
+                <input type="text" id="instagram" name="instagram" placeholder="Instagram" value="<%= user.instagram %>" />
+                <input type="text" id="facebook" name="facebook" placeholder="Facebook" value="<%= user.facebook %>" />
+                <input type="text" id="twitter" name="twitter" placeholder="Twitter" value="<%= user.twitter %>" />
 
                 <!-- Profile Photo -->
                 <h4>Profile Photo</h4>
-                    <div class="drop-zone center">
-                        <span class="drop-zone__prompt">Upload Profile Photo</span>
-                        <input type="file" name="files" class="drop-zone__input">
-                    </div>
+                <div class="drop-zone center">
+                    <span class="drop-zone__prompt">Upload Profile Photo</span>
+                    <input type="file" name="files" class="drop-zone__input">
+                </div>
                 <input type="submit" value="Submit Changes" />
                 <a style="color: red;" href="#"> Deactivate Account</a>
             </form>
