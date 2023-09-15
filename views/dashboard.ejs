@@ -75,13 +75,12 @@
                                                     <i class="fa fa-ellipsis-h" aria-hidden="true" data-bs-toggle="dropdown"></i>
                                                     <ul class="dropdown-menu">
                                                         <li><a class="dropdown-item delete-icon" href="#" id ="<%= project.project_id %>">Permanently Delete</a></li>
-                                                        <li><a class="dropdown-item" href="#">Archive</a></li>
                                                         <li>
                                                             <a class="dropdown-item toggle-star" href="#" data-project-id="<%= project.project_id %>" data-starred="<%= project.star %>">
                                                                 <%= project.star ? 'Unstar' : 'Star' %>
                                                             </a>
                                                         </li>
-                                                        
+                                                        <li><a class="dropdown-item" href="#">Archive</a></li>
                                                     </ul>
                                                 </div>
                                             </td>
