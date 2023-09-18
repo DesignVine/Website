@@ -26,6 +26,14 @@
             color: gold;
             margin-right: 5px;
         }
+        .favicon-thumbnail {
+            width: 30px;  
+            height: 30px;  
+            border: 1px solid #ddd;
+            border-radius: 2px;
+            padding: 2px;
+        }
+
     </style>
     <body id="page-top">
         <!-- Navigation-->
@@ -69,6 +77,11 @@
                                                 <% if (project.star) { %>
                                                     ★ <!-- This is the star icon -->
                                                 <% } %>
+                                                <% if (project.img) { %>
+                                                    <% let imgUrl = project.img.replace(/^.*uploads/, '/uploads'); %>
+                                                    <img src="<%= imgUrl %>" alt="Project Image" class="favicon-thumbnail">
+                                                <% } %>
+                                                
                                                 <a href="/project/<%= project.project_id %>/<%= user_id %>"><%= project.description %></a>
                                                 <!-- Dropdown Menu -->
                                                 <div class="dropdown">

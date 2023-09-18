@@ -114,7 +114,16 @@ app.get('/users/dashboard', checkNotAuthenticated, async (req,res) => {
     let projects;
     let groupedProjects = {};
     pool.query(
-        `SELECT * FROM projects WHERE user_id = $1 ORDER BY star DESC, project_id ASC`,[req.user.id], (err, results)=> {
+        `WITH project_images AS (
+            SELECT project_id, img 
+            FROM messages 
+            WHERE img_order = 1
+        )
+        SELECT projects.*, project_images.img 
+        FROM projects 
+        LEFT JOIN project_images ON projects.project_id = project_images.project_id 
+        WHERE projects.user_id = $1
+        ORDER BY projects.star DESC, projects.project_id ASC`,[req.user.id], (err, results)=> {
             if (err) {
                 throw err;
             }
@@ -432,7 +441,7 @@ app.post('/project', async function(req, res) {
     let pid = req.body.projectId;
     let textMessageAdded = false;
     let imageMessageAdded = false;
-
+    let img_order = 1;
     // Insert message only if it's not empty
     if (message !== '') {
         textMessageAdded = true;
@@ -462,14 +471,15 @@ app.post('/project', async function(req, res) {
                 throw err;
             });
             pool.query(
-                `INSERT INTO messages (user_id, project_id, img, sender)
-                VALUES ($1, $2, $3, $4)`, [user_id, pid, uploadPath, sender], (err, results)=> {
+                `INSERT INTO messages (user_id, project_id, img, sender,img_order)
+                VALUES ($1, $2, $3, $4, $5)`, [user_id, pid, uploadPath, sender,img_order], (err, results)=> {
                     if (err) {
                         throw err;
                     }
                     req.flash('success_msg', "Message added.");
                 }
             )
+            img_order++;
         });
     }
     else if(req.files) {
@@ -485,8 +495,8 @@ app.post('/project', async function(req, res) {
             throw err;
         });
         pool.query(
-            `INSERT INTO messages (user_id, project_id, img, sender)
-            VALUES ($1, $2, $3, $4)`, [user_id, pid, uploadPath, sender], (err, results)=> {
+            `INSERT INTO messages (user_id, project_id, img, sender,img_order)
+            VALUES ($1, $2, $3, $4, $5)`, [user_id, pid, uploadPath, sender,img_order], (err, results)=> {
                 if (err) {
                     throw err;
                 }
