@@ -93,7 +93,7 @@
                                                                 <%= project.star ? 'Unstar' : 'Star' %>
                                                             </a>
                                                         </li>
-                                                        <li><a class="dropdown-item" href="#">Archive</a></li>
+                                                        <li><a class="dropdown-item archive-project" href="#" data-project-id="<%= project.project_id %>">Archive</a></li>
                                                     </ul>
                                                 </div>
                                             </td>
@@ -200,6 +200,24 @@
                 });
             </script>
 
+            <script>
+                $(document).ready(function() {
+                    $('.archive-project').on('click', function(e) {
+                        e.preventDefault();
+
+                        const projectId = $(this).data('project-id');
+
+                        $.post(`/archive/${projectId}`, { archived: true }, (response) => {
+                            if (response.success) {
+                                // Remove or hide the project from the list or indicate it's archived
+                                $(this).closest('tr').remove(); // This will remove the project row. Adjust as needed.
+                            } else {
+                                console.error('Failed to archive the project.');
+                            }
+                        });
+                    });
+                });
+            </script>
             
             <script>
 

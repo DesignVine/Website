@@ -131,16 +131,18 @@ app.get('/users/dashboard', checkNotAuthenticated, async (req,res) => {
                 projects = results.rows;
                 console.log(projects);
                 projects.forEach(project => {
-                    let key = project.firstname + ' ' + project.lastname;
-                    if (!groupedProjects[key]) {
-                        groupedProjects[key] = {
-                            firstname: project.firstname,
-                            lastname: project.lastname,
-                            email: project.email,
-                            projects: []
-                        };
+                    if (project.archived === false) {
+                        let key = project.firstname + ' ' + project.lastname;
+                        if (!groupedProjects[key]) {
+                            groupedProjects[key] = {
+                                firstname: project.firstname,
+                                lastname: project.lastname,
+                                email: project.email,
+                                projects: []
+                            };
+                        }
+                        groupedProjects[key].projects.push(project);
                     }
-                    groupedProjects[key].projects.push(project);
                 });
             }
             else {
@@ -867,6 +869,23 @@ app.post('/toggle-star/:projectId', async (req, res) => {
         console.error(err);
         res.json({ success: false });
     }
+});
+app.post('/archive/:projectId', (req, res) => {
+    const projectId = req.params.projectId;
+
+    pool.query(
+        `UPDATE projects SET archived = true WHERE project_id = $1`,
+        [projectId],
+        (err, results) => {
+            if (err) {
+                console.error("Error updating project:", err);
+                res.json({ success: false });
+                return;
+            }
+
+            res.json({ success: true });
+        }
+    );
 });
 
 
